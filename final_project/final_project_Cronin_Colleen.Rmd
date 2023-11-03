@@ -1,0 +1,1104 @@
+---
+title: "Final Project – CONS 697/SMSC 532"
+author: "Colleen Cronin"
+date: "October 17, 2023"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+---
+
+
+<!-- Please knit this right away! The additional information for (html and css)
+are provided to help you build on your current R Markdown toolbox. You will not
+be responsible for learning these additional tools at this point. -->
+
+<!-- The head tag, <head>, is a container for metadata in an html document. 
+We can use it to define styles and do lots of other cool things things. -->
+<head>
+<!-- The link tag, <link>, creates a relationship between this file and
+an external source. Here, I'm linking font-awesome so I can include a 
+couple of icons that I like (user-secret and user-circle) -->
+<link 
+  rel="stylesheet" 
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<!-- Here I'm linking to a javascript file that will give us access to font awesome -->
+  <script src="https://kit.fontawesome.com/03064bdd6c.js" crossorigin="anonymous"></script>
+</head>
+<!-- Note in the above that some html tags, like <head> need to be closed 
+with </head>. Others, like <link> don't need a closing tag. -->
+
+```{css, echo = FALSE}
+.score {
+  font-weight: bold;
+  font-size: 16px;
+  color: red;
+  background-color: #ffff80;
+}
+
+.subscore {
+  font-size: 14px;
+  color: red;
+}
+
+/* Accordion style, the accordion is the section "Functions that you may use in this assignment" */
+  
+.accordion {
+  background-color: #e6f0ff;
+  color: #000000;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border-style: solid;
+  border-width: 2px;
+  border-color: #ffffff;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+  transition: 0.4s;
+}
+
+/* When you hover your mouse over the accordion button, it changes color. */
+
+.active, .accordion:hover {
+  background-color: #80b3ff; 
+  color: #ffffff;
+  font-weight: bold;
+}
+
+/* This is where the content of the accordion is placed. */
+
+.panel {
+  padding: 0 18px;
+  display: none;
+  background-color: #eeffff;
+  overflow: hidden;
+}
+
+/* Here, I add a custom class for area surrounding the graded portions of this
+assignment.*/
+
+.now_you {
+  border-left: 8px solid #292093;
+  background-color: #e6ffff;
+  padding: 16px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+/* This is where tips and tricks are formatted. */
+
+.mysecret {
+  border: 1px solid #999999;
+  border-style: solid; 
+  background-color: #efefef;
+  padding: 20px; 
+  border-radius: 25px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+h1, h2 {
+  margin-bottom: 4px;
+}
+
+hr {
+  margin-top: 0px;
+}
+
+.hr_memo {
+  height:1.5px;
+  border-width:0;
+  background-color:black; 
+  margin-top: 30px; 
+  margin-bottom: 30px
+}
+
+.memo {
+  font-family: monospace; 
+  border-radius: 10px; 
+  background: #efefef; 
+  border: 1px solid #bebebe; 
+  padding: 20px; 
+  margin-top: 20px;
+}
+```
+
+<!-- Here is the setup for knitr. I had to include tidyverse so I could
+include a tidyverse example with my Important warning statement below-->
+
+```{r knitr_setup, include = FALSE}
+options(knitr.table.format = "html")
+
+knitr::opts_chunk$set(error = TRUE)
+```
+
+
+## Context
+<hr>
+
+  <img  src = "https://img.apmcdn.org/e7c02535e5f299848e871bbd56ab721bafe8e880/uncropped/021d16-20150210-monarch02.jpg"
+        alt = "Monarch caterpillar"
+        style = "float: right; padding-left: 2em; padding-bottom: 1.5em; padding-right: 0em; width: 50%; height: auto;">
+  </img>
+
+
+You’ve been contracted as a GIS technician for the non-profit organization "Street Trees for Wildlife"! The non-profit will be conducting a study in which they will be sampling caterpillars on street trees in the District of Columbia (i.e., Washington DC). 
+
+Your goal is to provide GIS support for the organization and use GIS to guide a field team to the locations where they will collect their samples. Specifically, in this project, you will follow a series of steps to generate classified sampling locations that are within 1 kilometer of commuter train stations in Washington DC.
+
+This project will evaluate a number of GIS-in-R skills, including (*but not limited to!*) your ability to:
+
+* Read in and pre-process rasters (Memo 3), shapefiles (Memo 4), and tabular data (Memos 3 & 5)
+* Subset shapefiles by condition (Memos 5, 9-14)
+* Calculate summary information for spatial objects (Memos 7 & 8)
+* Use iteration (Memos 4 & 11)
+* Conduct spatial and non-spatial joins (Memos 5, 7-9, 13) and extract raster data to points (Memos 10 & 12)
+* Classify and reclassify shapefiles (Memos 6 & 14) and rasters (Memo 10)
+* Convert between different types of spatial objects (Memos 11 & 12)
+* Generate static (Memo 8) and interactive maps (Memos 9-10, 14)
+
+## Grading - read me!
+<hr>
+
+**Total points available**: 30
+
+You will hand in a single R Markdown file for this assignment.  This file must include all of the code used (provided in code chunks) in answering each question.
+
+**Your response to each "memo" is worth 10 points**. You will be graded on your **10 highest scoring memos** (feel free to skip some memos if you are confident in your answers!). If you get stuck, or have chosen to skip one of the memos, use one of the lifeline files to assist you.
+
+Points may be deducted from each question's total: 
+
+* [[1.0 points per violation]]{class="subscore"} Include only assignments specified in the question;
+* [[0.5]]{class="subscore"} Use only functions that we have used in this course **or** *any* function from the *sf*, *tidyverse*, and *tmap* package;
+* [[0.5]]{class="subscore"} Ensure that all code is properly indented;
+* [[0.5]]{class="subscore"} Ensure that your code follows modern coding conventions (see *Best practices in modern R coding*);
+* [[0.5]]{class="subscore"} Code parsimony!
+
+*Note: The maximum deduction is the total points value for a given question*
+
+As always, you must ensure that your R Markdown document **runs out-of-the-box** -- in other words, the document will knit without error. If it does not, you will receive a **20%** deduction on the total grade for the assignment. Some tips for doing so:
+
+* Do not maintain your project folder in a location that is backed up by an online directory (e.g., Dropbox, iCloud)
+* Ensure that all file paths are equivalent to those in this document (e.g., in `source()` or `read_csv()`)
+* Do not use `setwd()` in your code (***Never** use `setwd()`!*)
+* Prior to submission, clear all objects from your global environment prior to knitting your R Markdown document
+
+:::{class="mysecret"}
+<i class="fas fa-user-secret fa-2x"></i> Click the blue button below to view the functions that **I used** in completing this problem set. Although you are *not* required to use the same functions as I did, you might find this list helpful!
+:::
+
+<div>
+<button class="accordion">Functions that I used to answer the memos</button>
+<div class="panel">
+
+* base::`::`
+* base::`<-`
+* base::`=`
+* base::`+`
+* base::`!`
+* base::`>`
+* base::`>=`
+* base::`$`
+* base::`~`
+* base::`()`
+* base::`as.numeric`
+* base::`as.matrix`
+* base::`c`
+* base::`is.na`
+* base::`levels`
+* base::`library`
+* base::`list.files`
+* base::`list2env`
+* base::`rm`
+* base::`sum`
+* base::`unique`
+* dplyr::`arrange`
+* dplyr::`bind_cols`
+* dplyr::`case_when`
+* dplyr::`if_else`
+* dplyr::`filter`
+* dplyr::`left_join`
+* dplyr::`mutate`
+* dplyr::`n`
+* dplyr::`pull`
+* dplyr::`select`
+* dplyr::`slice_max`
+* dplyr::`summarize`
+* forcats::`fct_collapse`
+* ggplot2::`+`
+* ggplot2::`aes`
+* ggplot2::`geom_sf`
+* ggplot2::`ggplot`
+* ggplot2::`scale_fill_viridis_c`
+* ggplot2::`theme_void`
+* knitr::`kable`
+* magrittr::`%>%`
+* purrr::`map`
+* readr::`read_csv`
+* rlang::`set_names`
+* sf::`st_area`
+* sf::`st_as_sf`
+* sf::`st_buffer`
+* sf::`st_cast`
+* sf::`st_coordinates`
+* sf::`st_filter`
+* sf::`st_intersection`
+* sf::`st_join`
+* sf::`st_read`
+* sf::`st_transform`
+* stats::`setNames`
+* stringr::`str_detect`
+* terra::`aggregate`
+* terra::`classify`
+* terra::`distance`
+* terra::`extract`
+* terra::`mask`
+* terra::`rast`
+* terra::`rasterize`
+* tibble::`as_tibble`
+* tidyr::`drop_na`
+* tidyr::`pivot_wider`
+* tmap::`tm_basemap`
+* tmap::`tm_dots`
+* tmap::`tm_raster`
+* tmap::`tm_shape`
+* tmap::`tmap_mode`
+
+*Note: The packages dplyr, forcats, ggplot2, magrittr, purrr, readr, rlang, stringr, tibble, and tidyr are all part of the tidyverse and are loaded with `library(tidyverse)`.*
+
+</div>
+</div>
+
+<hr class="hr_memo">
+
+## Memo 1
+<hr>
+
+<div class = "memo">
+Welcome to the team GIS Guru!
+
+Please start by saving this R Markdown file with the naming convention "final_project_[your last name]_[your first name].Rmd" and modify the YAML header by providing your name and the date.
+
+Sincerely,
+
+Your new boss!
+
+</div>
+
+<hr>
+
+### Your response 2
+
+Here you go boss! I have created an R Markdown file using your chosen naming convention *and* added my name and date to the YAML header.
+
+<hr class="hr_memo">
+
+## Memo 2
+<hr>
+
+<div class = "memo">
+Hello GIS Guru,
+
+We're super into the *sf*, *tidyverse*, and *tmap* packages around here. Especially the tidyverse -- I've got a life-sized poster of Hadley in my office. Please make sure to load those packages before proceeding!
+
+Cheers,
+
+Your new boss!
+
+P.S. I'm also a big fan of interactive maps, so please set your *tmap* mode to "view"!
+
+</div>
+
+<hr>
+
+### Your response 2
+
+That was an easy one boss, here's how I loaded the packages:
+
+```{r question 2_packages}
+
+library(sf)
+library(tmap)
+library(tidyverse)
+
+```
+
+I also set the *tmap* mode to view for you -- here's how I did it:
+
+```{r question 2_tmap_mode}
+
+tmap_mode("view")
+
+```
+
+<hr class="hr_memo">
+
+## Memo 3
+<hr>
+
+<div class = "memo">
+
+Dear GIS Guru, 
+
+Let's really get things started by reading in two files from the folder
+`data/final_project_data` -- `nlcd_key.csv` and `lc_temp`. 
+
+As you are probably suspecting, the file `nlcd_key` is a key to the dataset
+`classified_lc.tif`. It is a tabular dataset with the following fields:
+
+* `id`: A unique identifier for land cover classes
+* `name`: A unique name defining each land cover class 
+* `color_value`: Colors typically used to visualize land cover classes
+* `description`: A long description of each class
+
+The file `classified_lc.tif` is a GeoTIFF raster obtained from the <a href="https://www.mrlc.gov/data" target="_blank">Multi-Resolution Land Characteristics Consortium (MRLC)</a>. This
+is a categorical raster that describes the land cover within the spatial extent 
+of the District of Columbia. The value of each cell represents
+the dominant land cover class (link) within that cell. The resolution of the raster
+is approximately 30 x 30 m and the CRS is EPSG 32618 (datum = World Geodetic 
+System 1984 (WGS 84); projected UTM Zone 18N).
+
+Please:
+
+* Read in the raster file `nlcd_key.csv` and globally assign the name
+`nlcd_key` to the resultant file.
+
+* Read in the raster file `classified_lc.tif` and globally assign the
+  name `lc_temp` to the resultant file.
+
+Warm regards,
+
+Your "meta" boss
+
+</div>
+
+### Your response 3
+
+I read in `nlcd_key.csv` and assigned the name `nlcd_key` to my global environment. Here's the code I used to do it!
+
+```{r question_3_lc_key}
+nlcd_key <-
+read_csv("data/final_project_data/nlcd_key.csv")
+
+```
+
+I used the *terra* package to read in the raster `classified_lc.tif` and assigned the name `lc_temp` to my global environment. Here's how I did it:
+
+```{r question_3_lc_raster}
+
+lc_temp <-
+  terra::rast("data/final_project_data/classified_lc.tif")
+
+```
+
+<hr class="hr_memo">
+
+## Memo 4
+<hr>
+
+<div class = "memo">
+
+Bonjour GIS Guru! 
+
+I have a number of shapefiles that I would like you to use for this project. Each shapefile was obtained from <a href="https://opendata.dc.gov/" target="_blank">Open Data DC</a> and collected/stored using the unprojected coordinate reference system EPSG 4326. The files include:
+
+* `metro_stops.geojson`: A point shapefile that describes the location of commuter train stations in Washington DC.
+* `national_parks.geojson`: A multipolygon shapefile where each shape represents land in Washington DC that is owned and operated by the US National Park service.
+* `streets.geojson`: A linestring shapefile of roads in Washington DC (*Note: This represents a simplified representation of the original version from Open Data DC*).
+* `wards`: A polygon shapefile that describes political regions (e.g., local voting areas) in Washington DC.
+
+Please use iteration to read in all of the geojson files in at once. In doing so:
+
+* Subset to the field `NAME` (but maintain the geometry).
+* Convert the field name, `NAME`, to lower case.
+* Convert the CRS to EPSG 32618.
+* Set the names of the objects to "metro_stops", "national_parks",
+  "streets" and "wards".
+* Assign the name of each shapefile to the global environment.
+
+Au revoir,
+
+Your sophisticated boss
+</div>
+
+### Your response 4
+
+Hi chef, I used iteration to read in, subset, and transform the shapefiles as you asked! Here is how I did it:
+
+```{r question_4}
+
+list.files("data/final_project_data",
+           pattern = 'geojson',
+           full.names = TRUE) %>%
+  purrr::map(
+    ~ st_read(.x) %>%
+               st_transform(crs = 32618) %>%
+               select(name = NAME)) %>%
+  set_names("metro_stops", 
+            "national_parks", 
+            "streets", 
+            "wards") %>%
+  list2env(envir = .GlobalEnv)
+
+```
+
+<hr class="hr_memo">
+
+## Memo 5
+<hr>
+
+<div class = "memo">
+
+Hiya GIS Guru,
+
+I've got a big processing step for you.  The file `Urban_Forestry_Street_Trees.csv` is a pretty gigantic tabular dataset that I downloaded from <a href="https://opendata.dc.gov/" target="_blank">Open Data DC</a>. Each record in the data represents a street tree in the District of Columbia. There are a lot of columns in the dataset, but we are only interested in:
+
+* `GENUS_NAME`: The genus of the street trees
+* `DBH`: The diameter of the street tree trunks, in inches
+* `X`: The longitudinal coordinates of the street trees, recorded in EPSG 4326
+* `Y`: The latitudinal coordinates of the street trees, recorded in EPSG 4326
+
+Please:
+
+* Read in `Urban_Forestry_Street_Trees.csv`
+* Subset to the fields `GENUS_NAME`, `DBH`, `X`, and `Y` (in that order)
+* Rename the fields to `genus`, `dbh`, `longitude`, and `latitude` (respectively)
+* Subset by removing bad records:
+    * Remove all records that contain an NA value (in any field)
+    * Remove all records where the genus begins with "No" (represents
+      a missing value or error)
+* Subset to records where the `dbh` is greater than 12 inches and then remove the field `dbh`
+* Convert to a point shapefile where the resultant CRS is EPSG 32618
+* Subset to tree locations that are within the `wards` shapefile
+* Globally assign the name `trees_temp` to the resultant object
+  
+Ta ta,
+  
+Your oddly data-aware boss
+
+</div>
+
+### Your response 5
+
+Hi there boss, that was a lot of steps! Here is how I generated the `trees_temp` point shapefile following the steps that you outlined above:
+
+```{r question_5}
+
+trees_temp <-
+  read_csv("data/final_project_data/Urban_Forestry_Street_Trees.csv") %>%
+  select(
+    genus = GENUS_NAME,
+    dbh = DBH,
+    longitude = X,
+    latitude = Y) %>%
+  drop_na() %>%
+  filter(
+    !str_detect(genus, pattern = "^No"), 
+    dbh > 12) %>%
+  select(!dbh) %>%
+  st_as_sf(coords = c('longitude', 'latitude'),
+           crs = 4326) %>%
+  st_transform(crs = 32618) %>%
+  st_filter(wards)
+  
+
+```
+
+<hr class="hr_memo">
+
+## Memo 6
+<hr>
+
+<div class = "memo">
+
+Top of the morning to you GIS Guru!
+
+Our team is primarily interested in oaks (Quercus) and maples (Acer).
+Reclassify the variable `genus` such that "Quercus" is classified as "oak",
+"Acer" is classified as "maple", and all other taxa are classified as
+"other". Let's save this one for later use -- globally assign the name
+`trees_classified` to the resultant object.
+
+Sl&#225;n leat,
+
+Your gaffer
+
+P.S. We are not going to use `trees_temp` again, so please remove it from
+your global environment.
+</div>
+
+### Your response 6
+
+Hello gaffer, I reclassified the `genus` field as you requested and globally assigned the name `trees_classified` to the resultant point shapefile. Here's how I did it:
+
+```{r question_6_a}
+
+trees_classified <-
+  trees_temp %>%
+  mutate(genus =
+           case_when(genus == "Quercus" ~ "oak",
+                     genus == "Acer" ~ "maple",
+                     TRUE ~ "other"))
+
+```
+
+I also removed `trees_temp` from the global environment:
+
+```{r question_6_b}
+
+rm(trees_temp)
+
+```
+
+<hr class="hr_memo">
+
+## Memo 7
+<hr>
+<div class = "memo">
+
+How dost thou fare GIS Guru? 
+
+The "wards" (District of Columbia voting areas) are keenly interested in
+our study! They want to know which ward has the most trees. Generate a
+kable table where:
+
+* The columns represent the number of oaks, maples, and total number of
+  trees by ward (*Please do not include a column representing the counts of the "other" class*);
+* The rows represent the wards;
+* The table is sorted by the ward number.
+
+Fare-thee-well,
+
+Your old-fashioned boss
+
+</div>
+
+### Your response 7
+
+Good morrow, boss! Here is a kable table that shows the number of oaks, maples, and total trees by ward (and the code I used to create it):
+
+```{r question_7}
+
+trees_classified %>%
+  st_join(wards) %>%
+  as_tibble() %>%
+  summarize(n = n(),
+            .by = c(genus, name)) %>%
+  pivot_wider(names_from = genus,
+              values_from = n) %>%
+  mutate(total = other + maple + oak) %>%
+  select(!other) %>%
+  arrange(name) %>%
+  knitr::kable()
+
+```
+
+<hr class="hr_memo">
+
+## Memo 8
+<hr>
+<div class = "memo">
+
+G'day GIS Guru,
+
+The "battle of the wards" is heating up! Some of the smaller wards
+thought our analysis wasn't fair. Let's give them a map of tree density
+by ward. Please:
+
+* For each ward, calculate the total number of street trees, across species, per square
+  kilometer.
+* Generate a ggplot map where the fill color of each ward is determined by the total
+  number of street trees per square kilometer.
+
+Hooroo,
+
+Your ggplotin' boss
+
+</div>
+
+### Your response 8
+
+Hi Boss, this ggplot map of total tree density by ward should appease those smaller wards:
+
+```{r question_8}
+
+trees_classified %>%
+  st_join(wards) %>%
+  as_tibble() %>%
+  summarize(n = n(),
+            .by = c(genus, name)) %>%
+  pivot_wider(names_from = genus,
+              values_from = n) %>%
+  mutate(total = other + maple + oak) %>%
+  select(!other) %>%
+  arrange(name) %>%
+  left_join(wards, .) %>%
+  mutate(
+    area =
+      st_area(.) %>%
+      units::set_units("km^2"),
+    density = total / area %>%
+      as.numeric()) %>%
+  
+  ggplot() +
+  geom_sf(aes(fill = density)) +
+  scale_fill_viridis_c(direction = -1,
+                       na.value = "#dcdcdc")
+
+```
+
+<hr class="hr_memo">
+
+
+## Memo 9
+<hr>
+
+<div class = "memo">
+Howdy GIS Guru, 
+
+So far, so good pardner! Unfortunately, we have not gotten permission to sample on land managed by the National
+Park Service! Please:
+
+* Subset `trees_classified` to trees that are NOT within the shapefile
+  `national_parks` and globally assign the name `trees_no_nps` to the
+  resultant object. *Hint: Unless you like waiting and/or overwhelming your system's memory, avoid using st_difference() for this operation!*
+* Remove `national_parks` and `trees_classified` from your global environment.
+* Provide an interactive map of tree locations where the color of the
+  map points is determined by the (classified) `genus` field and the
+  and the points are clustered.
+  
+
+Adios,
+
+Your rootin' tootin' boss
+
+</div>
+
+<hr>
+
+### Your response 9
+
+Here is the code that I used to create the `trees_no_nps` point shapefile:
+
+```{r question_9a}
+
+trees_no_nps <-
+  trees_classified %>%
+  st_filter(
+    st_union(national_parks),
+    .predicate = st_disjoint)
+
+```
+
+I then removed the names `national_parks` and `trees_classified` from my global environment:
+
+```{r question_9b}
+
+rm(national_parks, trees_classified)
+
+```
+
+... and created this interactive map of street trees in the District:
+
+```{r question_9c}
+
+tm_basemap(c("OpenStreetMap",
+             "Esri.WorldImagery")) +
+  tm_shape(trees_no_nps,
+           name = "Trees") +
+  tm_dots('genus',
+          clustering = TRUE) 
+
+```
+
+<hr class="hr_memo">
+
+## Memo 10
+<hr>
+
+<div class = "memo">
+Buenos dias GIS Guru, 
+
+Our team is interested in the number of caterpillars on street trees --
+previous studies have found that caterpillar abundance tends to be higher
+on trees that are close to forests. As such, we want to reduce any
+influence of forests on our results. Please:
+
+* Use `nlcd_key` and `lc_temp` to generate a distance raster where each pixel
+represents the distance, in meters, from the nearest forested pixel
+(i.e., any pixel classified as Deciduous, Evergreen, or Mixed Forest).
+* Globally assign the name `dc_forest_distance` to the resultant object.
+* Provide an interactive map that shows the distance from each
+  map pixel to land classified as forest (of any type). In doing so,
+  please ensure that only pixels within the shape `wards` are displayed
+  on the map.
+* Subset `trees_no_nps` to trees that are more than 100 meters from
+  a forested map pixel and globally assign the name `trees_no_forests` to
+  the resultant object.
+* Remove `dc_forest_distance`, `nlcd_key`, and `trees_no_nps` from your global environment.
+
+Pura vida,
+
+Your cartographic boss
+</div>
+
+<hr>
+
+### Your response 10
+
+Hola boss, here is how I generated (and globally assigned) the classified raster `dc_forest_distance`:
+
+```{r question_10_a}
+
+dc_forest_distance <-
+  nlcd_key %>%
+  mutate(class =
+           case_when(
+             str_detect(name, "Forest") ~ 1,
+                        TRUE ~ NA)) %>%
+  select(id, class) %>%
+  as.matrix() %>%
+  terra::classify(lc_temp, .) %>%
+  terra::categories(value =
+                      data.frame(from = 1,
+                                 to = "Forest")) %>%
+  terra::as.polygons() %>%
+  terra::distance(lc_temp, .) %>%
+  terra::mask(wards) 
+
+```
+
+Have a look at the interactive map that I generated of the distance raster -- what do you think?
+
+```{r question_10_b}
+
+  tm_shape(dc_forest_distance) +
+  tm_raster(palette = "-Greens",
+            n = 15) 
+```
+
+I then used that raster and `trees_no_nps` to subset to trees that are more than 100 meters from a forested pixel and globally assigned the name `trees_no_forests` to the resultant point shapefile:
+
+
+```{r question_10_c}
+
+trees_no_forests <-
+  nlcd_key %>%
+  mutate(class =
+           case_when(
+             str_detect(name, "Forest") ~ 1,
+                        TRUE ~ NA)) %>%
+  select(id, class) %>%
+  as.matrix() %>%
+  terra::classify(lc_temp, .) %>%
+  terra::categories(value =
+                      data.frame(from = 1,
+                                 to = "Forest")) %>%
+  terra::as.polygons() %>%
+  st_as_sf() %>%
+  st_buffer(dist = 100) %>%
+  st_intersects(trees_no_nps, ., sparse = FALSE) %>%
+  bind_cols(trees_no_nps, .) %>%
+  filter(`...3` == FALSE) %>%
+  select(!`...3`)
+
+```
+
+To save some RAM, I then freed up memory by removing `dc_forest_distance`, `nlcd_key`, and `trees_no_nps`   from my global environment:
+
+```{r question_10_d}
+
+rm(dc_forest_distance, nlcd_key, trees_no_nps)
+
+```
+
+<hr class="hr_memo">
+
+## Memo 11
+
+<div class = "memo">
+How ya doin' GIS Guru?
+
+We've been talking and we're all wicked impressed with the job you've been doing so far. Well, all of us except Chad, who's a bit of a tool -- Chad said "... yeah, but can they iterate with *terra* functions?". Now is a great time to flex your iteration and *terra* muscles because we need to count the number of trees of each classified `genus` ("maple", "oak", or "other") within ~60 x 60 m map pixels. A task like this would be *brutal* without iteration.
+
+Here's what I need you to do to show Chad-the-water-cooler-weirdo how it's done:
+
+* Using `trees_no_forests` as your model, generate a character vector of
+  unique `genus` values and globally assign the name `named_trees` to
+  the resultant object.
+* Using iteration, generate a raster layer for each `genus` where the
+  values in that layer represent the number of trees per map pixel;
+* Convert the resultant raster layers to a raster stack, where the name
+  of each layer is the represented `genus`.
+* Aggregate the resultant object by a factor of 2 and use the function
+  "sum" to calculate the total number of trees per ~60 x 60 m map pixel.
+* Convert all pixels outside of the shape `wards` to NA.
+* Globally assign the name `tree_stack` to the resultant raster stack.
+
+Later,
+
+Your awesome boss
+
+P.S. We will not use `lc_temp`, `named_trees`, `trees_no_forests`, or `wards` again, so please remove them from your global environment.
+</div>
+
+<hr>
+
+### Your response 11
+
+Hey boss, 
+
+Below is how I created a unique character vector of values in our classified `genus` column. I globally assigned the name `named_trees` to the resultant object.
+
+```{r question_11a}
+
+named_trees <-
+  trees_no_forests %>%
+  distinct(genus) %>%
+  as.list()
+
+named_trees = named_trees$genus
+
+```
+
+I used `named_trees` and a `map()` function to count the number of trees in each raster cell by `genus`, converted the list to a raster stack, and then aggregated the stack to your desired resolution. I globally assigned the name `tree_stack` to the resultant raster stack:
+
+```{r question_11b}
+
+tree_stack <-
+  named_trees %>%
+  purrr::map(
+    ~ trees_no_forests %>%
+      filter(genus == .x) %>%
+      terra::rasterize(lc_temp,
+                       fun = length,
+                       background = 0)) %>%
+  set_names(named_trees) %>%
+  terra::rast() %>%
+  terra::aggregate(2,
+                   fun = sum) %>%
+  terra::mask(wards)
+
+```
+
+... and once again saved some RAM by removing `lc_temp`, `named_trees`, `trees_no_forests`, and `wards` from the global environment:
+
+```{r question_11c}
+
+rm(lc_temp, named_trees, trees_no_forests, wards)
+
+```
+
+<hr class="hr_memo">
+
+## Memo 12
+<hr>
+
+<div class = "memo">
+Salutations GIS Guru!
+
+Now we're ready to start defining our sampling locations. Our technicians
+will be sampling at locations where roads turn or intersect. They will
+sample caterpillars from five trees at each site, so each sampling
+location must have a minimum of five trees. Additionally, we do not
+want them walking down any dark alleys, so we will only use named streets as
+potential sampling locations. Please:
+
+* Subset `streets` those in which the `name` field is not NA.
+* Remove the `name` field.
+* Convert `streets` to a point object.
+* Extract the raster values from `trees_stack` to each point.
+* Globally assign the name `sampling_points_all` to the resultant object.
+
+Nanu Nanu,
+
+Your suspicious boss
+
+P.S. We will not use `streets` or `tree_stack` again, so please remove those assigned names from your global environment.
+</div>
+
+<hr>
+
+### Your response 12
+
+I followed the steps that you provided and generated a point shapefile that I called `sampling_points_all`:
+
+```{r question_12a}
+
+sampling_points_all <-
+  streets %>%
+  filter(
+    !is.na(name)) %>%
+  select(!name) %>%
+  st_cast("POINT") %>%
+  filter(!duplicated(geometry)) %>%
+  bind_cols(
+    streets %>%
+      filter(
+        !is.na(name)) %>%
+      select(!name) %>%
+      st_cast("POINT") %>%
+      filter(!duplicated(geometry)) %>%
+      terra::vect() %>%
+      terra::extract(tree_stack,
+                     .,
+                     na.rm = TRUE) %>%
+      as_tibble()) %>%
+  filter((other + maple + oak) >= 5)
+
+```
+
+... and removed `streets` and `tree_stack` from my global environment:
+
+```{r question_12b}
+
+rm(streets, tree_stack)
+
+```
+
+<hr class="hr_memo">
+
+## Memo 13
+<hr>
+
+<div class = "memo">
+Greetings GIS Guru!
+
+Summers are hot in the District of Columbia -- we do not want our teams
+to have to walk too far during sampling. Here is our path forward:
+
+* Our teams will be taking the DC metro train to each sampling location,
+  so please subset `sampling_points_all` to those that are within 1 km of
+  a metro stop. In doing so, please maintain the name of the metro stop in
+  the resultant object.
+* Traveling on the metro train can take a long time, so subset
+  the potential sampling locations to just points that are near the following
+  metro stops (*In doing so, please maintain the name of the metro stop in the resultant object*):  
+    * Congress Heights,
+    * Eastern Market
+    * Fort Totten
+    * Minnesota Ave
+    * Tenleytown-AU
+    * Woodley Park-Zoo Adams Morgan;
+* Globally assign the name `sampling_points_metro` to the resultant
+  object.
+
+Live long and prosper,
+
+Your nerdy boss
+
+P.S. We will not use `sampling_points_all` or `metro_stops` again, so please remove those assigned names from your global environment.
+</div>
+
+<hr>
+
+### Your response 13 
+
+Hi Boss, I subset points to those that are within 1000 meters of your team's chosen metro stations, included the name of the metro station in the resultant object, and globally assigned the name `sampling_points_metro` to the point shapefile:
+
+```{r question_13a}
+
+sampling_points_metro <-
+  metro_stops %>%
+  st_buffer(dist = 1000) %>%
+  st_join(sampling_points_all, .) %>%
+  filter(
+    name %in% c(
+      "Congress Heights",
+      "Eastern Market",
+      "Fort Totten",
+      "Minnesota Ave",
+      "Tenleytown-AU",
+      "Woodley Park-Zoo Adams Morgan"))
+
+```
+
+... and removed `sampling_points_all` and `metro_stops` from the global environment:
+
+```{r question_13b}
+
+rm(sampling_points_all, metro_stops)
+
+```
+
+<hr class="hr_memo">
+
+## Memo 14
+
+<div class = "memo">
+Aloha GIS Guru, 
+
+We're almost ready to send out our field sampling team! Using
+`sampling_points_metro`, please:
+
+* Classify potential sampling points into four groups, "maple and oak",
+  "oak, no maple", "maple, no oak", and "no oak or maple".
+* Subset the resultant points to the two locations per metro stop and
+  sampling point class (as immediately above) with the most trees. To
+  avoid generating too many points, please ignore ties (i.e., if all
+  trees in a group have 9 trees, just select two from that group).
+* Help our field technicians find their sampling points by generating
+  a map where the background layers are Esri.WorldTopoMap and
+  Esri.WorldImagery and the color of the sampling locations are
+  determined by the sampling point class.
+
+Mahalo,
+
+Your super mellow boss
+</div>
+
+<hr>
+
+### Your response 14
+
+Fin! This interactive map of classified sampling locations should be just what your team is looking for to start their sampling!
+
+```{r question_14}
+
+tm_basemap(c('Esri.WorldTopoMap',
+             'Esri.WorldImagery')) +
+  
+sampling_points_metro %>%
+  mutate(
+    sample_class =
+      case_when(
+        maple >= 1 & oak >= 1 ~ "maple and oak",
+        oak >= 1 & maple == 0 ~ "oak, no maple",
+        maple >= 1 & oak == 0 ~ "maple, no oak",
+        TRUE ~ "no oak or maple"),
+    total_count =
+      maple + oak + other) %>%
+  slice_max(total_count,
+            n = 2,
+            by = name,
+            with_ties = FALSE) %>%
+  
+  tm_shape(name = "Sampling Locations Layer") +
+  tm_dots(col = "sample_class",
+          title = "Sampling Locations",
+          palette = c("#5f0f40", "#9a031e", "#0f4c5c", "#e36414")) 
+
+```
+
+<hr class="hr_memo">
+
+<script>
+var acc = document.getElementsByClassName("accordion");
+var i;
+
+for (i = 0; i < acc.length; i++) {
+  acc[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var panel = this.nextElementSibling;
+    if (panel.style.display === "block") {
+      panel.style.display = "none";
+    } else {
+      panel.style.display = "block";
+    }
+  });
+}
+</script>

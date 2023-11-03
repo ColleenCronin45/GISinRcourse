@@ -1,0 +1,446 @@
+---
+title: "Problem set 3: Cicada emergence"
+author: "Colleen Cronin"
+date: "September 6, 2023"
+output: html_document
+---
+
+<!--- head ------->
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src = 'https://kit.fontawesome.com/03064bdd6c.js' crossorigin='anonymous'></script>
+</head>
+
+
+```{css, echo = FALSE}
+/* I can add custom classes with a period symbol. See usage of this class below */
+.score {
+  font-weight: bold;
+  font-size: 16px;
+  color: red;
+  background-color: #ffff80;
+}
+
+.subscore {
+  font-size: 14px;
+  color: red;
+}
+
+/* Accordion style, the accordion is the section "Functions that you may use in this assignment" */
+  
+.accordion {
+  background-color: #e6f0ff;
+  color: #000000;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border-style: solid;
+  border-width: 2px;
+  border-color: #ffffff;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+  transition: 0.4s;
+}
+
+/* When you hover your mouse over the accordion button, it changes color. */
+
+.active, .accordion:hover {
+  background-color: #80b3ff; 
+  color: #ffffff;
+  font-weight: bold;
+}
+
+/* This is where the content of the accordion is placed. */
+
+.panel {
+  padding: 0 18px;
+  display: none;
+  background-color: #eeffff;
+  overflow: hidden;
+}
+
+/* Here, I add a custom class for area surrounding the graded portions of this
+assignment.*/
+
+.now_you {
+  border-left: 8px solid #292093;
+  background-color: #e6ffff;
+  padding: 16px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+/* This is where tips and tricks are formatted. */
+
+.mysecret {
+  border: 1px solid #999999;
+  border-style: solid; 
+  background-color: #efefef;
+  padding: 20px; 
+  border-radius: 25px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+h1, h2 {
+  margin-bottom: 4px;
+}
+
+hr {
+  margin-top: 0px;
+}
+```
+
+## Overview
+<hr>
+
+<figure 
+  style = 
+    "float: right; 
+    padding-left: 2em; 
+    padding-bottom: 1em; 
+    padding-right: 0em; 
+    margin-right: 15px;
+    width: 40%; 
+    height: auto;">
+  <img  
+    src = "https://lh3.googleusercontent.com/1dfPLMi9HIkLg746ltRkcuGVwcCocA33wDJYovxvZbsIUNOzSzQyASJ7869x-w8H6R989ym_onoKfEoUfB9WQXsXziWvDAm67RLpqeyFOVaTT6lUTVhkoDtCO-gTQjrmDYZ29sO1zgo=w2400?source=screenshot.guru"
+    alt = "A freshly emerged cicada on a flower.">
+  </img>
+  <figcaption style = "font-size: 1em;">*A cicada that emerged in my garden.*</figcaption>
+</figure>
+
+In the spring of 2021, the Brood X cicadas emerged throughout much of the Mid-Atlantic region. Brood X are periodical cicadas that spend most of their lives underground, emerge in the spring every 17 years, breed, and then die. In their adult form, they produce an incredibly loud song to attract mates.
+
+Our team at the Smithsonian deployed automated sound recording units (ARUs) throughout the District of Columbia, Maryland, and Virginia. Our goal for this study was to determine how bird song may vary in response to cicada noise along a gradient of anthropogenic noise and urban intensity.
+
+In this exercise, you will explore cicada observations collected by iNaturalist community science participants. Early reports by iNaturalist observers helped us to determine the appropriate locations to place our ARUs.
+
+## Grading
+<hr>
+
+The points allotted for each question are provided in highlighted red bold text (e.g., [1.0]</span>) within the question itself. When applicable, total points for a question may represent the sum of individually graded components, which are provided in red text (e.g., <span class = "subscore">[1.0]</span>).
+
+Points may be deducted from each question's total: 
+
+* [[50% per violation]]{class="subscore"} Use only functions listed in "Functions that you may use in this assignment";
+* [[50%]]{class="subscore"} Include only assignments specified in the question;
+* [[10%]]{class="subscore"} Ensure that all code is properly indented;
+* [[10%]]{class="subscore"} Ensure that your code follows modern coding conventions (see *Best practices in modern R coding*);
+* [[10%]]{class="subscore"} Ensure that all code chunks are formatted as `eval = TRUE` (but see below);
+* [[10%]]{class="subscore"} Ensure that the class of your response is consistent with the wording of the question (e.g., if you are asked to return a "value" or "vector", ensure that the resultant object is not a data frame).
+
+*Note: The maximum deduction is the total points value for a given question*
+
+In addition to points allotted per question, you must ensure that your R Markdown document **runs out-of-the-box** [[25% off of the total grade]]{class="subscore"} -- in other words, the document will knit without error.
+
+<div>
+<button class="accordion">Functions that you may use in this assignment</button>
+<div class="panel">
+
+In this assignment, you may use **only** the following R functions (*Note: If you are unclear on what a given function does, use `?` to view the help file!*):
+
+* base::`:`
+* base::`::`
+* base::`()`
+* base::`<-`
+* base::`=`
+* base::`==`
+* base::`!`
+* base::`!=`
+* base::`%in%`
+* base::c
+* base::library
+* base::min
+* base::names
+* base::rm
+* base::tolower
+* dplyr::arrange
+* dplyr::filter
+* dplyr::full_join
+* dplyr::inner_join
+* dplyr::mutate
+* dplyr::n
+* dplyr::select
+* dplyr::summarize
+* ggplot2::aes
+* ggplot2::geom_sf
+* ggplot2::ggplot
+* ggplot2::scale_fill_viridis_c
+* ggplot2::theme_void
+* ggplot2::theme_set
+* kableExtra::kable
+* kableExtra::kable_styling
+* magrittr::`%>%`
+* readr::read_csv
+* rlang::set_names
+* sf::st_as_sf
+* sf::st_crs
+* sf::st_filter
+* sf::st_join
+* sf::st_read
+* sf::st_transform
+* tibble::as_tibble
+
+*Note: The packages dplyr, ggplot2, magrittr, readr, rlang, and tibble are all part of the tidyverse and are loaded with `library(tidyverse)`.*
+
+</div>
+</div>
+
+## Getting started
+<hr>
+
+As always, please ensure that you are starting with a clean session! 
+
+:::{class="now_you"}
+
+1\. [[0.5]]{class="score"} Save and knit this document:
+
+* [[0.1]]{class="subscore"} Replace my name in the YAML header with yours 
+* [[0.1]]{class="subscore"} Add the current date in the YAML header
+* [[0.3]]{class="subscore"} Save the *.rmd* file in the **output** folder of your project as (*but replace my name with yours*): `problem_set_3_Evans_Brian.rmd`
+
+:::
+
+
+**All** of my scripts start with a setup section where I load libraries, set session options, conduct initial data loading, and early processing steps.
+
+:::{class="now_you"}
+
+2\. [[0.25]]{class="score"} Load the `sf` and `tidyverse` libraries.
+
+```{r question_2, results = 'hide', message = FALSE, warning = FALSE}
+
+library(tidyverse)
+library(sf)
+
+```
+
+<br>
+
+3\. [[0.5]]{class="score"} Set the theme of *all* of the plots in this document to `theme_void()`.
+
+```{r question_3, message = FALSE, warning = FALSE}
+
+theme_set(theme_void())
+
+```
+
+<br>
+
+4\. [[1.0]]{class="score"} Read in and process the file `cicadas_brood_x_2021.csv`. In doing so:
+
+* [[0.25]]{class="subscore"} Load the data as a tibble;
+* [[0.25]]{class="subscore"} Subset the data to where the quality grade is classified as "research";
+* [[0.25]]{class="subscore"} Subset the data to the fields `datetime`, `scientific_name`, `user`, `longitude`, and `latitude`;
+* [[0.25]]{class="subscore"} Globally assign the resultant object with the name `cicadas_temp`.
+
+```{r question_4, message = FALSE, warning = FALSE}
+
+cicadas_temp <-
+  read_csv("data/raw/cicadas_brood_x_2021.csv") %>%
+  filter(quality_grade == "research") %>%
+  select(datetime:user,
+         longitude,
+         latitude)
+
+```
+:::
+
+### About the cicada observation data
+
+The `cicadas_temp` file represents research-grade iNaturalist observations of Brood X periodical cicadas from February through September of 2021. These data contain the following fields:
+
+* `datetime`: The date and time of the observation, formatted as an ISO 8601 (yyyy-mm-dd hh:mm:ss) datetime object and reported in UTC;
+* `scientific_name`: The genus and species of the observed cicada;
+* `user`: The user's login name;
+* `place_guess`: Best guess for the location of the observation;
+* `longitude`: The longitude of an observation, recorded in EPSG 4326;
+* `latitude`: The latitude of an observation, recorded in EPSG 4326;
+* `image_url`: The address of the image online;
+* `quality_grade`: Whether the species identification can be trusted, based on expert opinion -- options include "casual", "needs_id", and "research" (verified by experts);
+* `description`: Notes that users may submit with their observations.
+
+:::{class="now_you"}
+
+5\. [[1.25]]{class="score"} Read and processes the file `counties.geojson` (*or `counties_low_res.geojson` if you have memory issues!*). In doing so:
+
+* [[0.25]]{class="subscore"} Read in the data as a simple features shapefile;
+* [[0.25]]{class="subscore"} Convert all field names to lowercase;
+* [[0.25]]{class="subscore"} Subset to the columns `geoid`, `name`, and `state_name` (in that order);
+* [[0.25]]{class="subscore"} Transform the Coordinate Reference System (CRS) of the object to EPSG 2283 (a CRS often used for Virginia);
+* [[0.25]]{class="subscore"} Globally assign the resultant object with the name `counties_temp`.
+
+```{r question_5, message = FALSE, warning = FALSE}
+
+counties_temp <-
+  st_read("data/raw//shapefiles/counties_low_res.geojson") %>%
+  set_names(names(.) %>%
+              tolower()) %>%
+  select(geoid,
+         name,
+         state_name) %>%
+  st_transform(crs = 2283)
+
+  
+
+```
+:::
+
+### About the county data
+
+:::{style="margin-bottom: 2em;"}
+
+The `counties_temp` file is an `sf` multipolygon shapefile where each feature represents a county in the United States. These data contain the following fields:
+
+* `geoid`: A primary key associated with each shape;
+* `name`: The county name;
+* `state_name`: The name of the US state where the county is located.
+
+:::
+
+## Subsetting data
+<hr>
+
+:::{class="now_you"}
+
+6\. [[1.0]]{class="score"} Brood X cicada are comprised of three species, *Magicicada cassinii*, *M. septendecim*, and *M. septendecula*. A large proportion of the observations (about 60%) could not be identified to species (you can explore this with `group_by()` and `summarize()`) and one of the observations was of a 13-year periodical cicada, *M. tredecim* (*Note: This species is not a Brood X cicada!*).
+
+* [[0.50]]{class="subscore"} Subset the data to Brood X cicada that could be identified to species;
+* [[0.25]]{class="subscore"} Assign the object to your global environment with the name `cicadas_brood_x`;
+* [[0.25]]{class="subscore"} Remove `cicadas_temp` from your global environment (in a separate code block).
+
+
+```{r question_6, message = FALSE, warning = FALSE}
+
+# cicadas_brood_x %>% 
+#   group_by(scientific_name) %>% 
+#   summarize(n = n())
+
+cicadas_brood_x <-
+  cicadas_temp %>%
+  filter(
+    scientific_name %in%
+      c(
+        "Magicicada cassinii",
+        "Magicicada septendecim",
+        "Magicicada septendecula"
+      )
+  )
+
+rm(cicadas_temp)
+
+```
+
+:::
+
+When working with spatial data, it's often necessary to subset the **spatial extent** of your files to your study area. This will save a lot of processing time (and, potentially, help you avoid out-of-memory errors!).
+
+:::{class="now_you"}
+
+7\. [[1.0]]{class="score"} Subset `counties_temp` to counties in the District of Columbia, Maryland, or Virginia [[0.50]]{class="subscore"}, globally assign the resultant object with the name `counties` [[0.25]]{class="subscore"}, and in a separate code block, remove `counties_temp` from your global environment [[0.25]]{class="subscore"}.
+
+```{r question_7, message = FALSE, warning = FALSE}
+
+counties <-
+  counties_temp %>%
+  filter(state_name %in% c("District of Columbia",
+                           "Maryland",
+                           "Virginia"))
+
+rm(counties_temp)
+
+```
+
+<br>
+
+8\. [[1.5]]{class="score"} Convert `cicadas_brood_x` to an `sf` point file [[0.25]]{class="subscore"} and subset to our area of interest. In doing so:
+
+* [[0.25]]{class="subscore"} Transform the CRS of the object to the same projection as `counties`;
+* [[0.50]]{class="subscore"} Subset the data to observations in the District of Columbia, Maryland, or Virginia;
+* [[0.25]]{class="subscore"} Globally assign the resultant object with the name `cicadas_sf`;
+* [[0.25]]{class="subscore"} Remove `cicadas_brood_x` from your global environment (in a separate code block).
+
+```{r question_8, message = FALSE, warning = FALSE}
+
+cicadas_sf <-
+  cicadas_brood_x %>%
+  st_as_sf(coords = c('longitude', 'latitude'),
+           crs = 4326) %>%
+  st_transform(st_crs(counties)) %>%
+  st_join(counties) %>%
+  filter(!is.na(state_name))
+
+rm(cicadas_brood_x)
+
+```
+
+:::
+
+## Data exploration
+<hr>
+
+In evaluating the distributions of Brood X for our experiment, we were interested in when each species of cicada emerged and where the most cicadas were observed.
+
+:::{class="now_you"}
+
+9\. [[1.5]]{class="score"} Generate a `kable` [[0.25]]{class="subscore"} that displays the **datetime** that each species of cicada [[0.50]]{class="subscore"} was **first observed** in each state [[0.50]]{class="subscore"}. Please arrange the table from earliest to latest datetime [[0.50]]{class="subscore"} (*Note: The columns of the summary table should be `state_name`, `scientific_name`, and `datetime`*).
+
+```{r question_9, message = FALSE, warning = FALSE}
+
+cicadas_sf %>%
+  as_tibble() %>%
+  group_by(state_name,
+           scientific_name) %>%
+  summarize(datetime = min(datetime)) %>%
+  arrange(datetime) %>%
+  knitr::kable()
+
+
+```
+
+<br>
+10\. [[1.5]]{class="score"} Generate a choropleth map of counties [[0.50]]{class="subscore"}, where:
+
+* [[0.50]]{class="subscore"} The fill color is determined by the number of cicadas that were observed in each county;
+* [[0.50]]{class="subscore"} Counties with no observations are colored light gray.
+
+```{r question_10, message = FALSE, warning = FALSE}
+
+cicadas_sf %>%
+  as_tibble() %>%
+  group_by(name) %>%
+  summarize(n = n()) %>%
+  full_join(counties,
+            .,
+            by = 'name') %>%
+  ggplot() +
+  geom_sf(data = counties) +
+  geom_sf(aes(fill = n)) +
+  scale_fill_viridis_c(option = "plasma",
+                       na.value = "#dcdcdc")
+
+
+```
+:::
+
+<hr>
+
+<script>
+var acc = document.getElementsByClassName("accordion");
+var i;
+
+for (i = 0; i < acc.length; i++) {
+  acc[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var panel = this.nextElementSibling;
+    if (panel.style.display === "block") {
+      panel.style.display = "none";
+    } else {
+      panel.style.display = "block";
+    }
+  });
+}
+</script>

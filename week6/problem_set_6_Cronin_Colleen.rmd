@@ -1,0 +1,595 @@
+---
+title: "Assignment, Week 6: Environmental equity, access to natural areas"
+author: "Colleen Cronin"
+date: "October 3, 2023"
+output: html_document
+---
+
+<!-- Please knit this right away! The additional information for (html and css)
+are provided to help you build on your current R Markdown toolbox. You will not
+be responsible for learning these additional tools at this point. -->
+
+<!-- The head tag, <head>, is a container for metadata in an html document. 
+We can use it to define styles and do lots of other cool things things. -->
+<head>
+<!-- The link tag, <link>, creates a relationship between this file and
+an external source. Here, I'm linking font-awesome so I can include a 
+couple of icons that I like (user-secret and user-circle) -->
+<link 
+  rel="stylesheet" 
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<!-- Here I'm linking to a javascript file that will give us access to font awesome -->
+  <script src="https://kit.fontawesome.com/03064bdd6c.js" crossorigin="anonymous"></script>
+</head>
+<!-- Note in the above that some html tags, like <head> need to be closed 
+with </head>. Others, like <link> don't need a closing tag. -->
+
+```{css, echo = FALSE}
+.score {
+  font-weight: bold;
+  font-size: 16px;
+  color: red;
+  background-color: #ffff80;
+}
+
+.subscore {
+  font-size: 14px;
+  color: red;
+}
+
+/* Accordion style, the accordion is the section "Functions that you may use in this assignment" */
+  
+.accordion {
+  background-color: #e6f0ff;
+  color: #000000;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border-style: solid;
+  border-width: 2px;
+  border-color: #ffffff;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+  transition: 0.4s;
+}
+
+/* When you hover your mouse over the accordion button, it changes color. */
+
+.active, .accordion:hover {
+  background-color: #80b3ff; 
+  color: #ffffff;
+  font-weight: bold;
+}
+
+/* This is where the content of the accordion is placed. */
+
+.panel {
+  padding: 0 18px;
+  display: none;
+  background-color: #eeffff;
+  overflow: hidden;
+}
+
+/* Here, I add a custom class for area surrounding the graded portions of this
+assignment.*/
+
+.now_you {
+  border-left: 8px solid #292093;
+  background-color: #e6ffff;
+  padding: 16px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+/* This is where tips and tricks are formatted. */
+
+.mysecret {
+  border: 1px solid #999999;
+  border-style: solid; 
+  background-color: #efefef;
+  padding: 20px; 
+  border-radius: 25px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+h1, h2 {
+  margin-bottom: 4px;
+}
+
+hr {
+  margin-top: 0px;
+}
+```
+
+<!-- Here is the setup for knitr. I had to include tidyverse so I could
+include a tidyverse example with my Important warning statement below-->
+
+```{r knitr_setup, include = FALSE}
+options(knitr.table.format = "html")
+
+knitr::opts_chunk$set(error = TRUE)
+```
+
+## Overview
+<hr>
+
+<div class = "row">
+
+<figure 
+  style = 
+    "float: right; 
+    padding-left: 2em; 
+    padding-bottom: 1em; padding-right: 0em; 
+    width: 50%; 
+    height: auto;">
+  <img  
+    src = "https://www.funinfairfaxva.com/wp-content/uploads/2015/03/Roosevelt-Island-boardwalk-trail.jpg"
+    alt="Trail on Roosevelt Island">
+  </img>
+  <figcaption style = "font-size: 0.75em;">*A trail on Roosevelt Island in the District of Columbia.*</figcaption>
+</figure>
+
+<div style = "padding-left: 1em;">
+
+Free play in "nature" is expected to positively impact childhood development. In the United States, socioeconomic status has been found to be a strong determinant of whether children have access to wild spaces. In this problem set we will address the idea of *environmental equity* in the District of Columbia, specifically in regards to access to forested parks. To do so, you will use raster data, shapefiles, and reclassification techniques to explore the spatial distribution of income, urban land cover, forests, and parks in the District.
+
+*Note: This problem set may be very difficult and/or time consuming! I suggest referencing this week's tutorial "6.4 Categorizing non-spatial and spatial data" while completing the assignment. Additionally, there are many intermediate objects you are asked to create throughout the assignment -- if you get stuck, please use the provided lifelines as needed.*
+</div>
+
+</div>
+
+<!-- A div is a container for html. I assign it to the class "my secret that
+we created above -->
+<div class = "mysecret">
+<!-- The i tag is commonly used to create italic text, but it can also be 
+used to create icons -->
+<i class="fas fa-user-secret"></i> When I create an R Markdown file to communicate a coding process, I usually work in a .R script file and copy-and-paste the code into the R Markdown document at the end.
+</div>
+
+## Grading
+<hr>
+
+The points allotted for each question are provided in highlighted red bold text (e.g., <span class = "score">[1.0]</span>) within the question itself. When applicable, total points for a question may represent the sum of individually graded components, which are provided in red text (e.g., <span class = "subscore">[1.0]</span>).
+
+Points may be deducted from each question's total: 
+
+* [[50% per violation]]{class="subscore"} Use only functions listed in "Functions that you may use in this assignment";
+* [[50%]]{class="subscore"} Include only assignments specified in the question;
+* [[10%]]{class="subscore"} Ensure that all code is properly indented;
+* [[10%]]{class="subscore"} Ensure that your code follows modern coding conventions (see *Best practices in modern R coding*);
+* [[10%]]{class="subscore"} Ensure that all code chunks are formatted as `eval = TRUE` (but see below);
+* [[10%]]{class="subscore"} Ensure that the class of your response is consistent with the wording of the question (e.g., if you are asked to return a "value" or "vector", ensure that the resultant object is not a data frame).
+
+*Note: The maximum deduction is the total points value for a given question*
+
+:::{class="mysecret"}
+<i class="fas fa-user-secret fa-2x"></i> Pay careful attention to the format of your code -- not following the rules above will cost you lots of little points (and some big ones) that can really add up!
+:::
+
+In addition to points allotted per question, you must ensure that your R Markdown document **runs out-of-the-box** [[25% off of the total grade]]{class="subscore"} -- in other words, the document will knit without error. Some tips for doing so:
+
+* Do not maintain your project folder in a location that is backed up by an online directory (e.g., Dropbox, iCloud).
+* Ensure that all file paths are equivalent to those in this document (e.g., in `source()` or `read_csv()`).
+* Do not use `setwd()` in your code (***Never** use `setwd()`!*)
+* If one of your code chunks contains an error, include `eval = FALSE` in the options for that chunk. Otherwise, ensure all of your code chunks options are `eval = TRUE`.
+* Prior to submission, clear all objects from your global environment and try to knit your document again.
+
+:::{class="mysecret"}
+<i class="fas fa-user-secret fa-2x"></i> Click the blue button below to view the functions that you may use in completing this problem set. Make sure that you know what each function does (use `?[function name]` if you do not). Do not use any functions outside of this list!
+:::
+
+<div>
+<button class="accordion">Functions that you may use in this assignment</button>
+<div class="panel">
+
+In this assignment, you may use **only** the following R functions (*Note: If you are unclear on what a given function does, use `?` to view the help file!*):
+
+* base::`::`
+* base::`<-`
+* base::`=`
+* base::`==`
+* base::`>=`
+* base::`$`
+* base::`!`
+* base::`~`
+* base::`()`
+* base::`as.matrix`
+* base::`c`
+* base::`data.frame`
+* base::`is.na`
+* base::`library`
+* base::`mean`
+* base::`rm`
+* base::`setNames`
+* base::`source`
+* dplyr::`case_when`
+* dplyr::`if_else`
+* dplyr::`filter`
+* dplyr::`mutate`
+* dplyr::`pull`
+* dplyr::`select`
+* dplyr::`summarize`
+* forcats::`fct_recode`
+* forcats::`fct_relevel`
+* magrittr::`%>%`
+* sf::`st_union`
+* stringr::`str_detect`
+* terra::`categories`
+* terra::`classify`
+* terra::`extract`
+* terra::`rasterize`
+* tibble::`tribble`
+* tmap::`+`
+* tmap::`tm_basemap`
+* tmap::`tm_polygons`
+* tmap::`tm_raster`
+* tmap::`tm_shape`
+* tmap::`tmap_mode`
+* tmap::`tmap_options`
+
+*Note: The packages dplyr, forcats, magrittr, and tibble are all part of the tidyverse and are loaded with `library(tidyverse)`. Additionally, this list only includes functions used when providing solutions for this problem set -- it is okay to use exploratory functions (but do not include them in your answers) and source script functions do not apply.*
+
+</div>
+</div>
+
+## Getting started
+<hr>
+
+<div class = "now_you">
+
+1\. [[0.5]]{class="score"} Save and knit this document:
+
+* [[0.1]]{class="subscore"} Replace my name in the YAML header with yours;
+* [[0.1]]{class="subscore"} Add the current date in the YAML header;
+* [[0.3]]{class="subscore"} Save the *.rmd* file in the **output** folder of your project as (*but replace my name with yours*): `assignment_6_Evans_Brian.rmd` 
+</div>
+
+## The setup
+<hr>
+
+**All** of my scripts start with a setup section where I load libraries, set session options, conduct initial data loading, and early processing steps.
+
+<div class = "now_you">
+2\. [[0.5]]{class="score"} Load the `sf`, `tmap`, and `tidyverse` libraries.
+
+```{r question_2, results = 'hide', message = FALSE, warning = FALSE}
+
+library(sf)
+library(tmap)
+library(tidyverse)
+
+```
+
+<br>
+3\. [[0.5]]{class="score"} Load data and set plot mode:
+
+* [[0.25]]{class="subscore"} Load the data using the source script: `source_script_problem_set_6.R`:  
+
+```{r question_3a, results = 'hide', message = FALSE}
+
+source("scripts/source_script_problem_set_6.R")
+
+```
+
+*  [[0.25]]{class="subscore"} Set the tmap mode to "view" for the entire document:
+
+```{r question_3b, results = 'hide', message = FALSE}
+
+tmap_mode("view")
+
+```
+
+The code below is necessary due to a current bug and an issue during on-the-fly reprojections that occur under-the-hood in tmap. Please run it: 
+
+```{r, message = FALSE}
+tmap_options(check.and.fix = TRUE)
+```
+
+<br>
+4\. [[1.0]]{class="score"} Convert the `census` data to a `SpatRaster` object:
+
+* [[0.5]]{class="subscore"} With the same resolution and extent as `rasters`;
+* [[0.3]]{class="subscore"} With values based on the field `income`;
+* [[0.1]]{class="subscore"} Assign the name `income_dc` to the resultant object;
+
+```{r 4_a-c, results = FALSE}
+
+income_dc <-
+  terra::rasterize(census, rasters, field = "income", na.rm = TRUE)
+
+```
+
+* [[0.1]]{class="subscore"} Remove `census` from your global environment:
+
+```{r 4_d}
+
+rm(census)
+
+```
+
+## Reclassify data
+<hr>
+
+<div class = "now_you">
+5\. [[1.0]]{class="score"} The DC parks and recreation department seeks to create green space for children and adults alike. This dataset contains the field "woodland" to describe the type of park. Using `parks_and_rec`:
+
+* [[0.2]]{class="subscore"} Subset DC parks to those where the values in `woodland` are not `NA`; 
+* [[0.5]]{class="subscore"} Using a function from the *forcats* package, add a field called `park_type` in which you reclassify the field `woodland` into the values "Forested" (`woodland == "Y"`) and "Not forested" (`woodland == "N"`);
+* [[0.1]]{class="subscore"} Subset the data to the columns `objectid` and `park_type`;
+* [[0.1]]{class="subscore"} Assign to the global environment with the name `dc_parks`;
+
+```{r 5_a-d, results = FALSE}
+
+dc_parks <-
+  parks_and_rec %>%
+  filter(!is.na(woodland)) %>%
+  mutate(
+    park_type =
+      woodland %>%
+      fct_collapse("Forested" = "Y", "Not Forested" = "N"),
+    fct_relevel("Not Forested", "Forested")) %>%
+  select(objectid, park_type)
+
+# could use drop_na(woodland) but drop_na could drop all nas from the whole dataset is nothing in parentheses
+
+#Not Forested has to be in quotes because the space
+
+```
+
+* [[0.1]]{class="subscore"} Remove `parks_and_rec` from your global environment:
+
+```{r 5_e}
+
+rm(parks_and_rec)
+
+```
+
+<br>
+6\. [[1.0]]{class="score"} Using `nlcd_key`, create a reclass matrix where:
+
+* [[0.20]]{class="subscore"} Water is given the value `NA`;
+* [[0.15]]{class="subscore"} Developed land cover classes are mapped to the value 1;
+* [[0.15]]{class="subscore"} Forest land cover classes are mapped to the value 2;
+* [[0.15]]{class="subscore"} All other classes are mapped to the value 3;
+* [[0.15]]{class="subscore"} The resultant object is a matrix;
+* [[0.10]]{class="subscore"} The object is assigned to the global environment with the name `rcl_nlcd`;
+
+```{r 6_a-f, results = FALSE}
+
+rcl_nlcd <-
+  nlcd_key %>%
+  mutate(class =
+           case_when(
+             name == "Open water" ~ NA,
+             str_detect(name, "Developed") ~ 1,
+             str_detect(name, "Forest") ~ 2,
+             TRUE ~ 3)) %>%
+  select(id, class) %>%
+  as.matrix()
+  
+
+```
+
+* [[0.1]]{class="subscore"} Remove `nlcd_key` from your global environment:
+
+```{r 6_g}
+
+rm(nlcd_key)
+
+```
+
+<br>
+7\. [[1.0]]{class="score"} Using `rcl_nlcd` and `rasters$nlcd`:
+
+* [[0.3]]{class="subscore"} Reclassify the `nlcd` raster such that it represents the developed (value = 1), forested (value = 2), and undeveloped open land (value = 3) land cover types in Washington DC;
+* [[0.3]]{class="subscore"} Change the numeric category values 1, 2, and 3 to the character values "Developed", "Forested", and "Undeveloped, open" (respectively);
+* [[0.2]]{class="subscore"} Change the name of the raster layer to "Land cover";
+* [[0.1]]{class="subscore"} Assign the raster to your global environment with the name "developed_and_forested_land";
+
+```{r 7_a-b, message = FALSE, warning = FALSE}
+
+developed_and_forested_land <-
+  rasters$nlcd %>%
+  terra::classify(rcl_nlcd) %>%
+  terra::categories(value =
+                      data.frame(
+                        from = 1:3,
+                        to = c("Developed", 
+                               "Forested", 
+                               "Undeveloped"))) %>%
+  setNames("Land cover")
+
+```
+
+* [[0.1]]{class="subscore"} Remove `rcl_nlcd` from your global environment:
+
+```{r}
+
+rm(rcl_nlcd)
+
+```
+
+<br>
+8\. [[1.5]]{class="score"} Impervious surface, which represents things like roads, sidewalks, and rooftops, is often used as a proxy for urban intensity. Our goal will be to classify the impervious surface raster (`rasters$imp`) into low (< 20% impervious surface), medium (20 through < 80% impervious surface), and high intensity (>= 80% impervious surface). *Classifying land cover based requires considerable care!*
+
+* [[0.3]]{class="subscore"} Using the above criteria and the `tribble()` function (among others), create a reclass matrix that can be used to classify the `rasters$imp` to the numeric values 1 (low), 2 (medium), and 3 (high);
+* [[0.1]]{class="subscore"} Assign the object to the global environment with the name `urban_rcl`;
+
+```{r 8_a-b, message = FALSE, warning = FALSE}
+
+urban_rcl <-
+  tribble(
+    ~ from, ~ to, ~ becomes,
+    0,      20,     1,
+    20,     80,     2,
+    80,     100,    3) %>% 
+  as.matrix()
+
+```
+
+* [[0.4]]{class="subscore"} Use `urban_rcl` to classify the `rasters$imp` 
+* [[0.3]]{class="subscore"} Change the numeric category values 1, 2, and 3 to the character values "low", "medium", and "high" (respectively);
+* [[0.2]]{class="subscore"} Change the name of the raster layer to "Urban intensity";
+* [[0.1]]{class="subscore"} Assign to your global environment with the name `urban_intensity`.
+
+```{r 8_d-e}
+
+urban_intensity <-
+  rasters$imp %>%
+  terra::classify(urban_rcl,
+                  include.lowest = TRUE,
+                  right = FALSE) %>%
+  terra::categories(value =
+                      data.frame(from = 1:3,
+                                 to = c("low", 
+                                        "medium", 
+                                        "high"))) %>%
+  setNames("Urban intensity")
+
+```
+
+* [[0.1]]{class="subscore"} Remove urban_rcl and from your global environment: 
+
+```{r 8_f}
+
+rm(urban_rcl)
+
+```
+
+<br>
+9\. [[2.0]]{class="score"} National Park Service land in Washington DC includes everything from traffic circles and monuments to intact patches of deciduous forest. Working with the file `nps`:
+
+* [[0.4]]{class="subscore"} Filter to features where the name includes the string “Park” but not "Parking";
+* [[0.3]]{class="subscore"} Combine the geometries of parks that share the same name;
+* [[0.4]]{class="subscore"} Add a field that represents the average canopy cover for each park;
+* [[0.4]]{class="subscore"} Using greater than or equal to 60% canopy as your criteria, add a field called `park_type` that represents whether a park is, on average, "Forested" or "Not Forested";
+* [[0.3]]{class="subscore"} Convert `park_type` to a factor variable where the levels are provided in the order: "Not Forested", "Forested";
+* [[0.1]]{class="subscore"} Remove all fields except for `park_type`;
+* [[0.1]]{class="subscore"} **Assign** the resultant object to your global environment with the name "nps_parks";
+
+
+```{r 9_a-g, message = FALSE, warning = FALSE}
+nps_parks <-
+  nps %>%
+  filter(
+    str_detect(name, "Park"),
+    !str_detect(name, "Parking")) %>%
+  summarize(geometry =
+              st_union(geometry),
+            .by = name) %>%
+  mutate(
+    canopy_mean =
+      # nps %>%
+      # filter(
+      #   str_detect(name, "Park"),
+      #   !str_detect(name, "Parking")) %>%
+      # summarize(geometry =
+      #             st_union(geometry),
+      #           .by = name) %>%
+      terra::extract(rasters$canopy,
+                     .,
+                     mean,
+                     na.rm = TRUE) %>%
+      pull(),
+    park_type =
+      if_else(canopy_mean >= 60,
+              "Forested",
+              "Not Forested"),
+    fct_relevel("Not Forested", "Forested")) %>%
+  select(park_type)
+
+  
+
+```
+
+* [[0.1]]{class="subscore"} Remove `nps` and `rasters` from your global environment:
+
+```{r 9_h}
+
+rm(nps, rasters)
+
+```
+</div>
+
+## Data visualization
+<hr>
+
+<div class = "now_you">
+
+<br>
+10\. [[1.0]]{class="score"}. Generate a tmap that includes each of the layers that you've developed above (see lifelines if you were not able to develop one of the files).
+
+*  [[0.25]]{class="subscore"} Use OpenStreetMap and Esri.WorldImagery as background layers;
+*  [[0.25]]{class="subscore"} Use the same color palette to represent "Not forested" and "Forested" for the `dc_parks` and `nps_parks` map layers;
+*  [[0.50]]{class="subscore"} Ensure meaningful layer names for each layer (see `?tm_shape`).
+
+```{r question_10, message = FALSE, eval = FALSE, warning = FALSE}
+
+tm_basemap(c('OpenStreetMap',
+             'Esri.WorldImagery')) +
+  
+  tm_shape(income_dc,
+           name = "Income") +
+  tm_raster(col = "income") +
+  
+  tm_shape(dc_parks,
+           name = "DC parks") +
+  tm_polygons(
+    col = "park_type",
+    palette = get_brewer_pal("-Greens", n = 2, plot = FALSE),
+    legend.show = FALSE) +
+  
+  tm_shape(developed_and_forested_land,
+           name = "Land cover") +
+  tm_raster(palette = "OrRd",
+            alpha = .6) +
+  
+  tm_shape(urban_intensity,
+           name = "Urban intensity") +
+  tm_raster(palette = "viridis",
+            alpha = .6) +
+  
+  tm_shape(nps_parks,
+           name = "NPS parks") +
+  tm_polygons(
+    col = "park_type",
+    palette = get_brewer_pal("-Greens", n = 2, plot = FALSE),
+    title = "NPS parks")
+  
+  
+
+  
+  
+  
+  
+  
+
+```
+</div>
+
+**Extra credit** [[0.25]]{class="subscore"}: You most likely have a duplicated legend. Check out the help file for `tm_polygons()` and remove one of the legends.
+
+<hr>
+
+Now that you've completed the code, take a look at the map that you've created. Does DC do a good job of providing forested spaces across all income levels in the city? In my opinion, a case could be made for *some* success despite socioeconomic clustering *and* much more work to do because of socioeconomic clustering!
+
+If you're guessing that we'll be exploring these patterns a bit further next week ...
+
+<script>
+var acc = document.getElementsByClassName("accordion");
+var i;
+
+for (i = 0; i < acc.length; i++) {
+  acc[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var panel = this.nextElementSibling;
+    if (panel.style.display === "block") {
+      panel.style.display = "none";
+    } else {
+      panel.style.display = "block";
+    }
+  });
+}
+</script>

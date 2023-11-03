@@ -1,0 +1,3064 @@
+---
+title: Building a shiny dashboard app
+output:
+  html_document:
+    code_folding: show
+    toc: true
+    toc_depth: 2
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+runtime: shiny
+---
+
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" type="text/css" href="www/add_styles.css">
+<link rel="icon" 
+type="image/png" 
+href = "www/hex_icon.png" />
+<script src="https://kit.fontawesome.com/03064bdd6c.js" crossorigin="anonymous"></script>
+<link rel="icon" 
+type="image/png" 
+href = "www/hex_icon.png" />
+</head>
+
+```{css more_styles, echo = FALSE}
+code{
+background-color:#f2f2f2;
+border-radius: 25px;
+}
+
+span.co{
+color:#000080;
+font-weight: bold;
+}
+
+img {
+display: block;
+padding-left: 15px;
+padding-right: 15px;
+padding-top: 10px;
+padding-bottom: 10px;
+}
+
+p {
+text-align: left;
+font-size: 18px;
+margin-bottom: 18px;
+padding-bottom: 6px;
+}
+
+ul, ol{
+line-height: 27px;
+text-align: left;
+font-size: 2rem;
+margin-left: 0px;
+margin-top: 18px;
+}
+
+blockquote{
+font-size: 18px;
+border-left: 8px solid #292093;
+background-color: #e6ffff;
+padding-left: 16px;
+padding-right: 16px;
+margin-top: 15px;
+margin-bottom: 15px;
+}
+
+.row{
+margin: auto;
+}
+
+table {
+border-collapse: collapse;
+}
+
+table, td, th {
+border: 1px solid black;
+padding: 5px;
+text-align: center;
+vertical-align: middle;
+}
+
+/* Create two equal columns that floats next to each other */
+.column {
+float: left;
+width: 50%;
+padding: 10px;
+}
+
+/* Clear floats after the columns */
+.row:after {
+content: "";
+display: table;
+clear: both;
+}
+
+.roundBorder {
+border-radius: 25px;
+border: 5px solid #30288C;
+background: #D6EAF8;
+padding-left: 20px;
+padding-right: 20px;
+padding-top: 10px;
+padding-bottom: 10px;
+}
+
+.roundBorderBlack {
+border-radius: 25px;
+border: 10px solid #D3D3D3;
+padding-left: 20px;
+padding-right: 20px;
+padding-top: 10px;
+padding-bottom: 10px;
+}
+
+.roundBorderBlackEx {
+border-radius: 5px;
+border: 5px solid #D3D3D3;
+padding-left: 5px;
+padding-right: 5px;
+padding-top: 2px;
+}
+
+.roundBorderEx {
+border-radius: 3px;
+border: 5px solid #30288C;
+background: #D6EAF8;
+padding-left: 5px;
+padding-right: 5px;
+padding-top: 2px;
+}
+
+.tt {
+position: relative;
+display: inline-block;
+class: inline; 
+font-weight: bold;
+font-family: "Avenir";
+font-size: 18px;
+border-bottom: 1px black;
+}
+
+/* Tooltip text */
+.tt .ttText {
+visibility: hidden;
+font-weight: normal;
+font-size: 18px;
+width: 200px;
+background-color: black;
+border: 1px solid black;
+color: white;
+text-align: left;
+padding: 5px;
+border-radius: 6px;
+position: absolute;
+z-index: 1;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tt:hover .ttText {
+visibility: visible;
+}
+
+div.tocify {
+width: 40%;
+max-width: 260px;
+max-height: 85%;
+}
+
+hr {
+margin-top: 12px;
+margin-bottom: 18px
+}
+
+.topic {
+font-size: 19px !important;
+}
+
+code {
+font-size: 16px !important;
+background-color: #efefef;
+}
+
+h1 {
+font-size: 3.5em;
+}
+
+h2 {
+font-size: 2.2em;
+padding-bottom: 22px;
+margin-top: 22px;
+margin-bottom: 22px;
+}
+
+h3 {
+font-size: 1.75em;
+margin-bottom: 18px;
+margin-bottom: 18px;
+}
+
+h4 {
+font-size: 1.25em;
+margin-bottom: 18px;
+}
+
+h5 {
+font-size: 1.1em;
+}
+
+pre {
+font-size: 16px !important;
+background-color: #efefef;
+margin-top: 0em;
+margin-bottom: 2em;
+}
+
+/* Accordian style */
+.accordion {
+background-color: #e6f0ff;
+color: #000000;
+cursor: pointer;
+padding: 18px;
+width: 100%;
+border-style: solid;
+border-width: 2px;
+border-color: #ffffff;
+text-align: left;
+outline: none;
+font-size: 15px;
+transition: 0.4s;
+}
+
+.active, .accordion:hover {
+background-color: #80b3ff; 
+color: #ffffff;
+font-weight: bold;
+}
+
+.panel {
+padding: 0 18px;
+display: none;
+background-color: white;
+overflow: hidden;
+}
+
+table {
+margin-top: 18px;
+}
+
+.mysecret {
+border: 1px solid #999999;
+border-style: solid; 
+padding: 20px; 
+border-radius: 25px;
+margin-top: 15px;
+margin-bottom: 15px;
+}
+
+```
+
+
+```{r, eval = TRUE, include  = FALSE}
+# Load library
+
+library(RCurl)
+
+source("https://raw.githubusercontent.com/bsevansunc/workshop_languageOfR/master/sourceCode.R")
+
+library(knitr)
+library(kableExtra)
+library(tidyverse)
+```
+
+## Overview
+
+**What is a shiny app?** At its most basic, a **shiny app** is a website in which a computer (the server) is running Program R, executing commands, and sending the results of the commands back to the website.
+
+We built a simple shiny app in our video lecture this week. In this tutorial, we'll build a more advanced shiny dashboard app that explores the spatial and temporal distribution of the Covid-19 outbreak.
+
+The final app we will build is:
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+
+# setup -------------------------------------------------------------------
+
+library(lubridate)
+library(sf)
+library(tmap)
+library(shiny)
+library(shinydashboard)
+library(tidyverse)
+
+# data --------------------------------------------------------------------
+
+# Read in covid data from New York Times:
+
+nyt_covid_url <-
+  'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv'
+
+# Get start date from NY Times:
+
+start_date <-
+  read_csv(nyt_covid_url) %>% 
+  pull(date) %>% 
+  min()
+
+# Read in population data from us census:
+
+population_states <-
+  read_csv('data/co-est2020.csv') %>% 
+  filter(COUNTY == '000') %>% 
+  select(
+    state = STNAME,
+    population = POPESTIMATE2020)
+
+# Read in shapefiles:
+
+us_states <-
+  st_read('data/us_states.geojson',
+          quiet = TRUE) %>% 
+  transmute(
+    state = name,
+    state_abbr = str_remove(iso_3166_2, 'US-'))
+
+conus_bbox <-
+  st_read('data/conus.shp',
+          quiet = TRUE) %>% 
+  st_bbox()
+
+# user interface ----------------------------------------------------------
+
+ui <- 
+  dashboardPage(
+    
+    dashboardHeader(title = 'Covid app'),
+    
+    dashboardSidebar(
+      sidebarMenu(
+        
+        menuItem(
+          'Overview',
+          tabName = 'overview',
+          icon = icon('book')),
+        
+        menuItem('Map',
+                 icon = icon('map'),
+                 tabName = 'maps'),
+        
+        menuItem('Table',
+                 icon = icon('table'),
+                 tabName = 'tables'),
+        
+        menuItem('Trend',
+                 icon = icon('chart-line'),
+                 tabName = 'charts')),
+      hr(),
+      radioButtons(
+        inputId = 'metric',
+        label = 'View:',
+        choiceNames = c('Cases', 'Deaths'),
+        choiceValues = c('cases', 'deaths')),
+      
+      dateRangeInput(
+        inputId = 'date_range',
+        label = 'Select a range of dates:',
+        start = start_date),
+      
+      checkboxInput(
+        inputId = 'population_adjust',
+        label = 'Adjust for population?'),
+      
+      collapsed = FALSE
+    ),
+    
+    dashboardBody(
+      tags$head(
+        tags$link(
+          rel = 'stylesheet',
+          type = 'text/css',
+          href = 'dashboard_styles.css'
+        )
+      ),
+      
+      tabItems(
+        
+        tabItem(
+          tabName = 'overview',
+          h2('Overview'),
+          p('Here is an example shiny application that uses a dahsboard interface. We will use this app to explore data on the temporal and spatial distribution of Covid-19.'),
+          p('Click the menu items in the sidebar menu on the left to explore what this app can do!')),
+        
+        tabItem(
+          tabName = 'maps',
+          h2('Map'),
+          tmapOutput(outputId = 'covid_map')),
+        
+        tabItem(
+          tabName = 'tables',
+          h2('Summary table'),
+          dataTableOutput(outputId = 'summary_table')),
+        
+        tabItem(
+          tabName = 'charts',
+          h2('Trend'),
+          selectInput(
+            inputId = 'state_select',
+            label = 'State',
+            choices = c('Show all',
+                        sort(us_states$state))),
+          plotOutput(outputId = 'plot_output'))
+      )
+    )
+  )
+
+# server ------------------------------------------------------------------
+
+server <- 
+  function(input, output) { 
+    
+    # Get covid data. We place it hear so that the most recent data is 
+    # read in at the start of an app instance:
+    
+    covid_states <-
+      read_csv(nyt_covid_url) %>% 
+      select(-fips) %>% 
+      pivot_longer(cases:deaths, 
+                   names_to = 'metric',
+                   values_to = 'n')
+    
+    # Data subsetting and summarizing -------------------------------------
+    
+    # Filter data by metric and date range:
+    
+    covid_filtered <-
+      reactive({
+        covid_states %>% 
+          filter(
+            metric == input$metric,
+            between(as_date(date),
+                    as_date(input$date_range[1]),
+                    as_date(input$date_range[2])))
+      })
+    
+    # Adjust for population if checked:
+    
+    covid_adjusted <-
+      reactive({
+        if (input$population_adjust) {
+          covid_filtered() %>% 
+            left_join(population_states,
+                      by = 'state') %>% 
+            mutate(n = n/population*100) %>% 
+            select(-population)
+        } else {
+          covid_filtered()
+        }
+      })
+    
+    # Summarize data for map and summary table:
+    
+    covid_summarized <-
+      reactive({
+        covid_adjusted() %>% 
+          group_by(state) %>% 
+          summarize(n = max(n) - min(n))
+      })
+    
+    # Adjust for population if checked:
+    
+    # Trend data:
+    
+    covid_trend <-
+      reactive({
+        if (input$state_select == 'Show all') {
+          covid_adjusted() 
+        } else {
+          covid_adjusted() %>% 
+            filter(state == input$state_select)
+        }
+      })
+    
+    # Outputs -------------------------------------------------------------
+    
+    # Map:
+    
+    output$covid_map <-
+      renderTmap(
+        us_states %>% 
+          left_join(
+            covid_summarized(),
+            by = 'state') %>% 
+          tm_shape() +
+          tm_polygons(col = 'n') +
+          tm_view(bbox = conus_bbox))
+    
+    # Summary table:
+    
+    output$summary_table <-
+      renderDataTable(
+        covid_summarized())
+    
+    # Plot:
+    
+    output$plot_output <-
+      renderPlot(
+        covid_trend() %>% 
+          ggplot(
+            aes(x = date, 
+                y = n,
+                color = state)) +
+          geom_line() +
+          theme_minimal())
+  }
+
+# knit and run app --------------------------------------------------------
+
+shinyApp(ui, server)
+```
+
+## Set up
+
+Please create a new folder in a location that is easily accessible and not backed up in the cloud (i.e., not in a location connected to Google Drive, Dropbox, Box, OneDrive, nor iCloud). Call the folder `covid_app`.
+
+Generate a new R Studio project called `covid_app.prj` inside of the `covid_app` folder.
+
+Download the zip file `covid_app.zip` from your course web page and unzip the file to the folder `covid_app`.
+
+Open the file `covid_app.R` in your source pane.
+
+### File structure
+
+The zip folder contains the app file itself, `covid_app.R`, and two folders, `data` and `www`. 
+
+#### The data folder
+
+The `data` folder is where you will store data that will be used by the app's server. In other words, this folder contains information that Program R will use. It consists of the following files:
+
+* `co-est2020.csv`: Comma-separated United States Census table that provides estimates of county populations from 2010 to 2020
+* `us_states.geojson`: A geojson shapefile of US states
+* `conus.shp`: ESRI-formatted shapefile with one feature == the boundary of the contiguous United States (i.e., the boundary of US states excluding Alaska and Hawaii)
+
+#### The www folder
+
+The `www` folder is where you store files that will be used by the user interface of the app. I typically use this file to store images, custom JavaScript, and CSS (Cascading Style Sheets).
+
+This folder contains one file -- `dashboard_styles.css`. CSS files determine how html elements are styled.
+
+## Shiny app structure
+
+Shiny apps can be built with multiple R script files or a single script file. Earlier versions of the shiny package required that the app be split into two separate files -- `ui.R` and `server.R`. When an app is very long (I have one that is greater than 10,000 lines), I still sometimes create an app using the two-file format (see <a href = "https://shiny.rstudio.com/articles/two-file.html" target = "_blank">this resource</a> for more information).
+
+A shiny app must be split into the following sections:
+
+* **Set up**: Library loading and any content that will **not** change with app usage.
+* **ui -- the User Interface**: This is where all of the html elements go, including commands sent to the server (for execution in R) and output received from the server.
+* **server(input, output)**: An R function that receives commands from the `ui`, executes R, and sends output back to the `ui`.
+* **shinyApp()**: An R function that binds the `ui` and `server` to convert the app to an html file.
+
+### The basic shiny app
+
+At its most basic, a shiny spp can be written as:
+
+```{r, eval = FALSE}
+# setup -----------------------------------------
+
+library(shiny)
+
+# ui --------------------------------------------
+
+ui <-
+  fluidPage()
+
+# server ----------------------------------------
+
+server <-
+  function(input, output) { 
+  }
+
+# knit and run app ------------------------------
+
+shinyApp(ui, server)
+```
+
+You can copy-and-paste the above into a new R script file, use the keyboard shortcut Control or command A to select all, and Control or Command Enter to run the entire code and generate the shiny app (the last function, `shinyApp` knits the document).
+
+In the above, the function `fluidPage()` specified the primary container for the html file.
+
+It's not very exciting, because there is no content in the app == it's just a skeleton.
+
+## The User Interface (UI)
+
+The UI defines what the user sees when they interact with the app and sends commands to the server.
+
+For this app, we'll make a `dashboardPage()` as our primary container. A dashboard page is divided into a **header**, **sidebar**, and **body**. These are generated, respectively, with the functions `dashboardHeader()`, `dashboardSidebar()`, and `dashboardBody()`:
+
+```{r}
+# setup -----------------------------------------
+
+library(shiny)
+library(shinydashboard)
+
+# ui --------------------------------------------
+
+ui <-
+  dashboardPage(
+    dashboardHeader(),
+    dashboardSidebar(),
+    dashboardBody()
+  )
+
+# server ----------------------------------------
+
+server <-
+  function(input, output) { 
+  }
+
+# knit and run app ------------------------------
+
+shinyApp(ui, server)
+
+```
+
+This one is, *perhaps*, a little more exciting. Notice the three stacked horizontal lines in the app. This is a button that closes and opens the dashboard sidebar. 
+### The header
+
+The header is the bar on the top of the app. We can add the title of our app to the header inside of the `dashboardHeader()` function:
+
+```{r}
+# setup -----------------------------------------
+
+library(shiny)
+library(shinydashboard)
+
+# ui --------------------------------------------
+
+ui <-
+  dashboardPage(
+    dashboardHeader(title = 'Covid app'),
+    dashboardSidebar(),
+    dashboardBody()
+  )
+
+# server ----------------------------------------
+
+server <-
+  function(input, output) { 
+  }
+
+# knit and run app ------------------------------
+
+shinyApp(ui, server)
+
+```
+
+### The dashboard sidebar
+
+The sidebar is where we'll place the table of contents to the app and controls that will be used across **tabs** (pages in the app).
+
+Let's add our table of contents first. Each item in the table of contents will be used to navigate to a tab in the app. We create the menu with the function `sidebarMenu()`. Each menu item is created with the function `menuItem()`. For each menu item, we specify the name that we would like to appear on the app with `text = ` and the name of the tab it refers to with `tabName = `.
+
+```{r}
+# setup -----------------------------------------
+
+library(shiny)
+library(shinydashboard)
+
+# ui --------------------------------------------
+
+ui <-
+  dashboardPage(
+    dashboardHeader(title = 'Covid app'),
+    dashboardSidebar(
+      sidebarMenu(
+        menuItem(text = 'Overview', 
+                 tabName = 'overview'),
+        
+        menuItem(text = 'Map',
+                 tabName = 'maps'),
+        
+        menuItem(text = 'Table',
+                 tabName = 'tables'),
+        
+        menuItem(text = 'Trend',
+                 tabName = 'charts'))
+    ),
+    dashboardBody()
+  )
+
+# server ----------------------------------------
+
+server <-
+  function(input, output) { 
+  }
+
+# knit and run app ------------------------------
+
+shinyApp(ui, server)
+
+```
+
+We can spice up our menu by adding font-awesome icons:
+
+```{r}
+# setup -----------------------------------------
+
+library(shiny)
+library(shinydashboard)
+
+# ui --------------------------------------------
+
+ui <-
+  dashboardPage(
+    dashboardHeader(title = 'Covid app'),
+    dashboardSidebar(
+      sidebarMenu(
+        menuItem(text = 'Overview', 
+                 icon = icon('book'),
+                 tabName = 'overview'),
+        
+        menuItem(text = 'Map',
+                 icon = icon('map'),
+                 tabName = 'maps'),
+        
+        menuItem(text = 'Table',
+                 icon = icon('table'),
+                 tabName = 'tables'),
+        
+        menuItem(text = 'Trend',
+                 icon = icon('chart-line'),
+                 tabName = 'charts'))
+    ),
+    dashboardBody()
+  )
+
+# server ----------------------------------------
+
+server <-
+  function(input, output) { 
+  }
+
+# knit and run app ------------------------------
+
+shinyApp(ui, server)
+
+```
+
+### The dashboard body
+
+Now we need to generate the tabs themselves. This is done inside of the `dashboardBody()` function. Tabs are placed inside of the `tabItems()` function, with each tab specified as a separate `tabItem()`:
+
+```{r}
+# setup -----------------------------------------
+
+library(shiny)
+library(shinydashboard)
+
+# ui --------------------------------------------
+
+ui <-
+  dashboardPage(
+    dashboardHeader(title = 'Covid app'),
+    dashboardSidebar(
+      sidebarMenu(
+        menuItem(text = 'Overview', 
+                 icon = icon('book'),
+                 tabName = 'overview'),
+        
+        menuItem(text = 'Map',
+                 icon = icon('map'),
+                 tabName = 'maps'),
+        
+        menuItem(text = 'Table',
+                 icon = icon('table'),
+                 tabName = 'tables'),
+        
+        menuItem(text = 'Trend',
+                 icon = icon('chart-line'),
+                 tabName = 'charts'))
+    ),
+    dashboardBody(
+      tabItems(
+        tabItem(tabName = 'overview'),
+        tabItem(tabName = 'maps'),
+        tabItem(tabName = 'tables'),
+        tabItem(tabName = 'charts')
+      )
+    )
+  )
+
+# server ----------------------------------------
+
+server <-
+  function(input, output) { 
+  }
+
+# knit and run app ------------------------------
+
+shinyApp(ui, server)
+
+```
+
+Notice in the above that each `tabName` corresponds to the `tabName` in the sidebar.
+
+There's not much exciting going on inside of those tabs yet though -- that's because the tabs have no content.
+
+### Adding html tags
+
+Content is created, structured, and displayed on a web page using html **tags**. As you may recall, when we knit an R markdown file, we convert markdown language in html (hypertext markup language). This process involves converting markdown text and symbols into tags. When working in shiny, we have to explicitly specify the tag.
+
+For example, in markdown, we specify a second level heading with `## heading name`. When we knit the document, the markdown text is converted to the html code: `<h2>heading name</h2>`. The `html_tools` package provides functions for converting a character string to an html tag. To write a second level heading with `html_tools` (which is loaded with shiny by default), we use the function `h2()`.
+
+Let's add second level headings to each of our tabs:
+
+```{r}
+# setup -----------------------------------------
+
+library(shiny)
+library(shinydashboard)
+
+# ui --------------------------------------------
+
+ui <-
+  dashboardPage(
+    dashboardHeader(title = 'Covid app'),
+    dashboardSidebar(
+      sidebarMenu(
+        menuItem(text = 'Overview', 
+                 icon = icon('book'),
+                 tabName = 'overview'),
+        
+        menuItem(text = 'Map',
+                 icon = icon('map'),
+                 tabName = 'maps'),
+        
+        menuItem(text = 'Table',
+                 icon = icon('table'),
+                 tabName = 'tables'),
+        
+        menuItem(text = 'Trend',
+                 icon = icon('chart-line'),
+                 tabName = 'charts'))
+    ),
+    dashboardBody(
+      tabItems(
+        tabItem(tabName = 'overview',
+                h2('Overview')),
+        tabItem(tabName = 'maps',
+                h2('Maps')),
+        tabItem(tabName = 'tables',
+                h2('Tables')),
+        tabItem(tabName = 'charts',
+                h2('Trend'))
+      )
+    )
+  )
+
+# server ----------------------------------------
+
+server <-
+  function(input, output) { 
+  }
+
+# knit and run app ------------------------------
+
+shinyApp(ui, server)
+
+```
+
+If you click across the items in the sidebar menu now, you should see that the content in each tab is shown with a heading.
+
+There are lots of different tags you can use out-of-the box (see `?htmltools::builder()` for a complete list of their provided tags). For example, let's add a couple of objects with paragraph tags:
+
+```{r}
+# setup -----------------------------------------
+
+library(shiny)
+library(shinydashboard)
+
+# ui --------------------------------------------
+
+ui <-
+  dashboardPage(
+    dashboardHeader(title = 'Covid app'),
+    dashboardSidebar(
+      sidebarMenu(
+        menuItem(text = 'Overview', 
+                 icon = icon('book'),
+                 tabName = 'overview'),
+        
+        menuItem(text = 'Map',
+                 icon = icon('map'),
+                 tabName = 'maps'),
+        
+        menuItem(text = 'Table',
+                 icon = icon('table'),
+                 tabName = 'tables'),
+        
+        menuItem(text = 'Trend',
+                 icon = icon('chart-line'),
+                 tabName = 'charts'))
+    ),
+    dashboardBody(
+      tabItems(
+        tabItem(tabName = 'overview',
+                h2('Overview'),
+                p('Here is an example shiny application that uses a dahsboard interface. We will use this app to explore data on the temporal and spatial distribution of Covid-19.'),
+                p('Click the menu items in the sidebar menu on the left to explore what this app can do!')),
+        tabItem(tabName = 'maps',
+                h2('Maps')),
+        tabItem(tabName = 'tables',
+                h2('Tables')),
+        tabItem(tabName = 'charts',
+                h2('Trend'))
+      )
+    )
+  )
+
+# server ----------------------------------------
+
+server <-
+  function(input, output) { 
+  }
+
+# knit and run app ------------------------------
+
+shinyApp(ui, server)
+
+```
+
+A more complete set of tag functions is available with the object `tags`. This is a list object where each list item is a tag function. For example, we can also specify the tag for h2 heading by calling the function `h2` from the `tags` list.
+
+```{r}
+htmltools::tags$h2
+```
+
+I use the tags function for tags that are not directly as `htmltools` functions. 
+
+One tag that is of particular importance is `head()`. This is where we specify dependencies across the dashboard body. We place `tags$head()` at the top of our `dashboardBody()` function.
+
+I'll use it here to link (with `tags$link()`) our content to the css file in the `www` folder:
+
+```{r}
+# setup -----------------------------------------
+
+library(shiny)
+library(shinydashboard)
+
+# ui --------------------------------------------
+
+ui <-
+  dashboardPage(
+    dashboardHeader(title = 'Covid app'),
+    dashboardSidebar(
+      sidebarMenu(
+        menuItem(text = 'Overview', 
+                 icon = icon('book'),
+                 tabName = 'overview'),
+        
+        menuItem(text = 'Map',
+                 icon = icon('map'),
+                 tabName = 'maps'),
+        
+        menuItem(text = 'Table',
+                 icon = icon('table'),
+                 tabName = 'tables'),
+        
+        menuItem(text = 'Trend',
+                 icon = icon('chart-line'),
+                 tabName = 'charts'))
+    ),
+    dashboardBody(
+      tags$head(
+        tags$link(
+          rel = 'stylesheet',
+          type = 'text/css',
+          href = 'dashboard_styles.css'
+        )
+      ),
+      tabItems(
+        tabItem(tabName = 'overview',
+                h2('Overview'),
+                p('Here is an example shiny application that uses a dahsboard interface. We will use this app to explore data on the temporal and spatial distribution of Covid-19.'),
+                p('Click the menu items in the sidebar menu on the left to explore what this app can do!')),
+        tabItem(tabName = 'maps',
+                h2('Maps')),
+        tabItem(tabName = 'tables',
+                h2('Tables')),
+        tabItem(tabName = 'charts',
+                h2('Trend'))
+      )
+    )
+  )
+
+# server ----------------------------------------
+
+server <-
+  function(input, output) { 
+  }
+
+# knit and run app ------------------------------
+
+shinyApp(ui, server)
+
+```
+
+With the material we covered in the UI section, and a little bit of exploration of html and css, we can generate basically any static webpage front end. 
+
+## Loading data
+
+Our next step is to load the data that our app will use. The UI doesn't directly talk to program R, so no data can be loaded there. For the most part, there are two places that we can load data -- in the setup section (or anywhere above the UI and server) and the server. 
+
+Here's the basic criteria when choosing to load data:
+
+* Load data in outside of the server if the data only need to be loaded when the app is created. ***Warning!** Large files can sometimes make your app prohibitively slow to load!*
+* Load data inside the server if you want the data to change over time. ***Warning!** Big data wrangling operations can max out the memory allocated to your app!*
+
+### US States
+
+The shapefile `data/us_states.geojson` will not change over the life of the application so we will load it in the setup section:
+
+```{r}
+us_states <-
+  st_read('data/us_states.geojson')
+```
+
+I do data preparation outside of the server whenever possible. Our goal will be to reduce the data to just the fields of interest and, if possible, conduct data wrangling steps prior to loading the data into the server. This will ensure that the files that make up the application are as small as possible. Moreover, it will ensure that sometimes-memory-consuming wrangling steps are completed outside of the app itself.
+
+`us_states` is the raw shapefile and, like many, it's got a ton of columns (83 of them!):
+
+```{r}
+names(us_states)
+```
+
+We're only interested in the geometries and two of the fields here -- the name of the state and its abbreviation. I'll select our fields of interest during the read:
+
+
+```{r}
+us_states <-
+  st_read('data/us_states.geojson') %>% 
+  select(name_en, postal)
+
+us_states
+```
+
+I'll change the column names along the way to something a bit more user-friendly:
+
+```{r}
+us_states <-
+  st_read('data/us_states.geojson') %>% 
+  select(state = name_en, 
+         state_abbr = postal)
+
+us_states
+```
+
+Let's see what they look like:
+
+```{r}
+tmap_mode('view')
+
+tm_shape(us_states) +
+  tm_polygons()
+```
+
+I hope you're as unimpressed as I am ...
+
+### Making a bounding box
+
+No offense intended to the wonderful state of Alaska, but that state has a real knack for messing up our interactive maps -- because of the Aleutian Islands, Alaska is both the Eastern-most and Western-most state in the United States.
+
+To counter this, we can generate an interactive map in which the initial boundaries are set to the contiguous United States. We'll do so using the shapefile `conus.shp`:
+
+```{r}
+conus <-
+  st_read('data/conus.shp')
+```
+
+Let's take a look:
+
+```{r}
+tm_shape(conus) +
+  tm_polygons()
+```
+
+That's where I want our map to be centered! Doing so doesn't require the full shape, just the bounding box. I'll use `st_bbox()` to extract the spatial extent:
+
+```{r}
+conus_bbox <-
+  st_read('data/conus.shp') %>% 
+  st_bbox()
+```
+
+When writing a shiny app, every bit of memory counts. Check out the difference between the sizes of the two files:
+
+```{r}
+object.size(conus)
+
+object.size(conus_bbox)
+```
+
+The `conus` file is more than 14 times larger than the `conus_bbox` file! Because of that, I'll remove `conus`:
+
+```{r}
+rm(conus)
+```
+
+We can use `conus_bbox` to modify the bounding box of the map:
+
+```{r}
+us_states %>% 
+  tm_shape() +
+  tm_polygons() +
+  tm_view(bbox = conus_bbox)
+```
+
+If you scroll around this map, you'll notice that this does not remove the other state shapefiles -- it only sets the initial view window.
+
+### State populations
+
+Our next goal will be to read in the state population data from the US Census Bureau. This is a static file (stored locally) and will not change over the life of the app. Because of that, I'll also read and process this file outside of the server.
+
+```{r}
+population_states <-
+  read_csv('data/co-est2020.csv')
+
+population_states
+```
+
+One thing to notice here is the `COUNTY` code "000". That represents the entire state, not an individual county. We're only interested in state-level populations for our app. We can address this by filtering to rows where `COUNTY` is equal to "000":
+
+```{r}
+population_states <-
+  read_csv('data/co-est2020.csv') %>% 
+  filter(COUNTY == '000')
+
+population_states
+```
+
+And we'll select and rename our variables of interest:
+
+```{r}
+population_states <-
+  read_csv('data/co-est2020.csv') %>% 
+  filter(COUNTY == '000') %>% 
+  select(
+    state = STNAME,
+    population = POPESTIMATE2020)
+
+population_states
+```
+
+### Covid cases
+
+The New York Times provides a daily summary of Covid-19 cases on their GitHub site. Because this information changes daily, we won't save the data to our computer. Instead, we'll receive the data directly from their GitHub feed:
+
+```{r}
+nyt_covid_url <-
+  'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv'
+
+read_csv(nyt_covid_url)
+```
+
+We are not interested in the fips code, so we'll remove that:
+
+```{r}
+read_csv(nyt_covid_url) %>% 
+  select(-fips)
+```
+
+I want to be able to filter the data to cases or deaths (rather than selecting cases or deaths -- you'll see why in a little bit). That's a problem given the current structure of the data. To address this, I'll pivot the data:
+
+```{r}
+read_csv(nyt_covid_url) %>% 
+  select(-fips) %>% 
+  pivot_longer(cases:deaths, 
+               names_to = 'metric',
+               values_to = 'n')
+```
+
+And we'll assign a name to the resultant object:
+
+```{r}
+covid_states <-
+  read_csv(nyt_covid_url) %>% 
+  select(-fips) %>% 
+  pivot_longer(cases:deaths, 
+               names_to = 'metric',
+               values_to = 'n')
+```
+
+We've got the data into the format that we will use in our app but **where do we read it in?** If we read this in outside of the server, the data would not change after the website was published. We've got to read it in inside of the server function!
+
+*Note: The url doesn't change, so we'll read that in outside of the server.*
+
+### Putting it together
+
+Here's how our script looks with the data reading steps:
+
+```{r, eval = FALSE}
+# setup -----------------------------------------
+
+library(shiny)
+library(shinydashboard)
+
+# States shapefile, subset to the fields state 
+# name and abbreviation:
+
+us_states <-
+  st_read('data/us_states.geojson') %>% 
+  select(state = name_en, 
+         state_abbr = postal)
+
+# A bounding box for the tmap viewing window:
+
+conus_bbox <-
+  st_read('data/conus.shp') %>% 
+  st_bbox()
+
+# State populations in 2020:
+
+population_states <-
+  read_csv('data/co-est2020.csv') %>% 
+  filter(COUNTY == '000') %>% 
+  select(
+    state = STNAME,
+    population = POPESTIMATE2020)
+
+# URL for the New York Times GitHub page:
+
+nyt_covid_url <-
+  'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv'
+
+# ui --------------------------------------------
+
+ui <-
+  dashboardPage(
+    dashboardHeader(title = 'Covid app'),
+    dashboardSidebar(
+      sidebarMenu(
+        menuItem(text = 'Overview', 
+                 icon = icon('book'),
+                 tabName = 'overview'),
+        
+        menuItem(text = 'Map',
+                 icon = icon('map'),
+                 tabName = 'maps'),
+        
+        menuItem(text = 'Table',
+                 icon = icon('table'),
+                 tabName = 'tables'),
+        
+        menuItem(text = 'Trend',
+                 icon = icon('chart-line'),
+                 tabName = 'charts'))
+    ),
+    dashboardBody(
+      tags$head(
+        tags$link(
+          rel = 'stylesheet',
+          type = 'text/css',
+          href = 'dashboard_styles.css'
+        )
+      ),
+      tabItems(
+        tabItem(tabName = 'overview',
+                h2('Overview'),
+                p('Here is an example shiny application that uses a dahsboard interface. We will use this app to explore data on the temporal and spatial distribution of Covid-19.'),
+                p('Click the menu items in the sidebar menu on the left to explore what this app can do!')),
+        tabItem(tabName = 'maps',
+                h2('Maps')),
+        tabItem(tabName = 'tables',
+                h2('Tables')),
+        tabItem(tabName = 'charts',
+                h2('Trend'))
+      )
+    )
+  )
+
+# server ----------------------------------------
+
+server <-
+  function(input, output) { 
+    
+    # Daily covid data from the New York Times:
+    
+    covid_states <-
+      read_csv(nyt_covid_url) %>% 
+      select(-fips) %>% 
+      pivot_longer(cases:deaths, 
+                   names_to = 'metric',
+                   values_to = 'n')
+  }
+
+# knit and run app ------------------------------
+
+shinyApp(ui, server)
+
+```
+
+## Data wrangling interlude
+
+Take a moment to explore the behavior and outputs of the app (especially if you haven't done so already):
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+
+# setup -------------------------------------------------------------------
+
+library(lubridate)
+library(sf)
+library(tmap)
+library(shiny)
+library(shinydashboard)
+library(tidyverse)
+
+# data --------------------------------------------------------------------
+
+# Read in covid data from New York Times:
+
+nyt_covid_url <-
+  'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv'
+
+# Get start date from NY Times:
+
+start_date <-
+  read_csv(nyt_covid_url) %>% 
+  pull(date) %>% 
+  min()
+
+# Read in population data from us census:
+
+population_states <-
+  read_csv('data/co-est2020.csv') %>% 
+  filter(COUNTY == '000') %>% 
+  select(
+    state = STNAME,
+    population = POPESTIMATE2020)
+
+# Read in shapefiles:
+
+us_states <-
+  st_read('data/us_states.geojson',
+          quiet = TRUE) %>% 
+  transmute(
+    state = name,
+    state_abbr = str_remove(iso_3166_2, 'US-'))
+
+conus_bbox <-
+  st_read('data/conus.shp',
+          quiet = TRUE) %>% 
+  st_bbox()
+
+# user interface ----------------------------------------------------------
+
+ui <- 
+  dashboardPage(
+    
+    dashboardHeader(title = 'Covid app'),
+    
+    dashboardSidebar(
+      sidebarMenu(
+        
+        menuItem(
+          'Overview',
+          tabName = 'overview',
+          icon = icon('book')),
+        
+        menuItem('Map',
+                 icon = icon('map'),
+                 tabName = 'maps'),
+        
+        menuItem('Table',
+                 icon = icon('table'),
+                 tabName = 'tables'),
+        
+        menuItem('Trend',
+                 icon = icon('chart-line'),
+                 tabName = 'charts')),
+      hr(),
+      radioButtons(
+        inputId = 'metric',
+        label = 'View:',
+        choiceNames = c('Cases', 'Deaths'),
+        choiceValues = c('cases', 'deaths')),
+      
+      dateRangeInput(
+        inputId = 'date_range',
+        label = 'Select a range of dates:',
+        start = start_date),
+      
+      checkboxInput(
+        inputId = 'population_adjust',
+        label = 'Adjust for population?'),
+      
+      collapsed = FALSE
+    ),
+    
+    dashboardBody(
+      tags$head(
+        tags$link(
+          rel = 'stylesheet',
+          type = 'text/css',
+          href = 'dashboard_styles.css'
+        )
+      ),
+      
+      tabItems(
+        
+        tabItem(
+          tabName = 'overview',
+          h2('Overview'),
+          p('Here is an example shiny application that uses a dahsboard interface. We will use this app to explore data on the temporal and spatial distribution of Covid-19.'),
+          p('Click the menu items in the sidebar menu on the left to explore what this app can do!')),
+        
+        tabItem(
+          tabName = 'maps',
+          h2('Map'),
+          tmapOutput(outputId = 'covid_map')),
+        
+        tabItem(
+          tabName = 'tables',
+          h2('Summary table'),
+          dataTableOutput(outputId = 'summary_table')),
+        
+        tabItem(
+          tabName = 'charts',
+          h2('Trend'),
+          selectInput(
+            inputId = 'state_select',
+            label = 'State',
+            choices = c('Show all',
+                        sort(us_states$state))),
+          plotOutput(outputId = 'plot_output'))
+      )
+    )
+  )
+
+# server ------------------------------------------------------------------
+
+server <- 
+  function(input, output) { 
+    
+    # Get covid data. We place it hear so that the most recent data is 
+    # read in at the start of an app instance:
+    
+    covid_states <-
+      read_csv(nyt_covid_url) %>% 
+      select(-fips) %>% 
+      pivot_longer(cases:deaths, 
+                   names_to = 'metric',
+                   values_to = 'n')
+    
+    # Data subsetting and summarizing -------------------------------------
+    
+    # Filter data by metric and date range:
+    
+    covid_filtered <-
+      reactive({
+        covid_states %>% 
+          filter(
+            metric == input$metric,
+            between(as_date(date),
+                    as_date(input$date_range[1]),
+                    as_date(input$date_range[2])))
+      })
+    
+    # Adjust for population if checked:
+    
+    covid_adjusted <-
+      reactive({
+        if (input$population_adjust) {
+          covid_filtered() %>% 
+            left_join(population_states,
+                      by = 'state') %>% 
+            mutate(n = n/population*100) %>% 
+            select(-population)
+        } else {
+          covid_filtered()
+        }
+      })
+    
+    # Summarize data for map and summary table:
+    
+    covid_summarized <-
+      reactive({
+        covid_adjusted() %>% 
+          group_by(state) %>% 
+          summarize(n = max(n) - min(n))
+      })
+    
+    # Adjust for population if checked:
+    
+    # Trend data:
+    
+    covid_trend <-
+      reactive({
+        if (input$state_select == 'Show all') {
+          covid_adjusted() 
+        } else {
+          covid_adjusted() %>% 
+            filter(state == input$state_select)
+        }
+      })
+    
+    # Outputs -------------------------------------------------------------
+    
+    # Map:
+    
+    output$covid_map <-
+      renderTmap(
+        us_states %>% 
+          left_join(
+            covid_summarized(),
+            by = 'state') %>% 
+          tm_shape() +
+          tm_polygons(col = 'n') +
+          tm_view(bbox = conus_bbox))
+    
+    # Summary table:
+    
+    output$summary_table <-
+      renderDataTable(
+        covid_summarized())
+    
+    # Plot:
+    
+    output$plot_output <-
+      renderPlot(
+        covid_trend() %>% 
+          ggplot(
+            aes(x = date, 
+                y = n,
+                color = state)) +
+          geom_line() +
+          theme_minimal())
+  }
+
+# knit and run app --------------------------------------------------------
+
+shinyApp(ui, server)
+```
+
+This app will have three outputs, a map, table, and plot. Each output will allow the user to select a range of dates, covid cases or deaths, and case/death numbers that are adjusted or unadjusted for the size of the population. 
+
+I **always** ensure that I can generate a desired output outside of shiny before applying to the app. It's much easier to search for problems in R code than it is to search for code issues within an app!
+
+### Subsetting and mutating data
+
+Let's first subset the data to a selected `metric` (`cases` or `deaths`) by simply filtering the data:
+
+```{r}
+covid_states %>% 
+  filter(metric == 'cases')
+```
+
+Let's now address how we might subset `covid_states` to a range of dates. Here, I'll subset the rows to dates that are between 1 January 2022 and the current date:
+
+```{r}
+covid_states %>% 
+  filter(
+    metric == 'cases',
+    between(date,
+            as_date('2022-01-01'),
+            today()))
+```
+
+The data provided by the New York Times are the cumulative number of cases since the beginning of the pandemic. If we want to show the number of cases within the user's selected range of dates, we need to use grouped mutation:
+
+```{r}
+covid_states %>% 
+  filter(
+    metric == 'cases',
+    between(date,
+            as_date('2022-01-01'),
+            today())) %>% 
+  group_by(state) %>% 
+  mutate(n = n - min(n)) %>% 
+  ungroup()
+```
+
+We'll assign these data to our global environment with the name `covid_filtered`:
+
+```{r}
+covid_filtered <-
+  covid_states %>% 
+  filter(
+    metric == 'cases',
+    between(date,
+            as_date('2022-01-01'),
+            today())) %>% 
+  group_by(state) %>% 
+  mutate(n = n - min(n)) %>% 
+  ungroup()
+```
+
+What if we wanted to calculate the per capita number of cases? We first need to join the data to the `population_states` file:
+
+```{r}
+population_states %>% 
+  left_join(
+    covid_filtered,
+    by = 'state')
+```
+
+... and then divide the number of cases (`n`) by the size of the population:
+
+```{r}
+population_states %>% 
+  left_join(
+    covid_filtered,
+    by = 'state') %>% 
+  mutate(n = n/population)
+```
+
+If we wanted to express per capita cases as a percentage, we can multiple `n` by 100:
+
+```{r}
+population_states %>% 
+  left_join(
+    covid_filtered,
+    by = 'state') %>% 
+  mutate(n = n*100/population)
+```
+
+We can use the **control flow construct** `if(TRUE) {this} else {that}` to generate a "switch" that will provide output that is adjusted or unadjusted by the population size:
+
+```{r}
+# Adjusted:
+
+adjusted <- 
+  TRUE
+
+if(adjusted) {
+  population_states %>% 
+    left_join(
+      covid_filtered,
+      by = 'state') %>% 
+    mutate(n = n*100/population)
+} else {
+  covid_filtered
+}
+
+# Unadjusted:
+
+adjusted <- 
+  FALSE
+
+if(adjusted) {
+  population_states %>% 
+    left_join(
+      covid_filtered,
+      by = 'state') %>% 
+    mutate(n = n*100/population)
+} else {
+  covid_filtered
+}
+```
+
+Let's assign this to our global environment with the name `covid_adjusted_unadjusted`:
+
+```{r}
+covid_adjusted_unadjusted <-
+  if(adjusted) {
+    population_states %>% 
+      left_join(
+        covid_filtered,
+        by = 'state') %>% 
+      mutate(n = n*100/population)
+  } else {
+    covid_filtered
+  }
+```
+
+***Note**: Make sure you have a clear understanding of the above. The control flow construct `if(TRUE) {this} else {that}` is very important for app building!*
+
+### Data output summary table and map
+
+Our first two outputs (the map and the table) provide the total number cases or the percent of the population infected (depending on user inputs) over the select range of date inputs. To obtain these data, we need to use `group_by()` and `summarize()`:
+
+```{r}
+covid_adjusted_unadjusted %>% 
+  group_by(state) %>% 
+  summarize(n = max(n))
+```
+
+I'll assign this to the global environment with the name `covid_summarized`:
+
+```{r}
+covid_summarized <-
+  covid_adjusted_unadjusted %>% 
+  group_by(state) %>% 
+  summarize(n = max(n))
+```
+
+The summary table in the app is simply `covid_summarized`.
+
+To generate a map with these data, we must first join the `us_states` file and `covid_summarized`:
+
+```{r}
+us_states %>% 
+  left_join(covid_summarized, 
+            by = 'state')
+```
+
+... and then pipe the data into `tmap`:
+
+```{r}
+us_states %>% 
+  left_join(covid_summarized, 
+            by = 'state') %>% 
+  tm_shape() +
+  tm_polygons(col = 'n') +
+  tm_view(bbox = conus_bbox)
+```
+
+### Data output for the trend plot
+
+For our trend plot, users are given the ability to select a state of interest or show all of the states at once. For this, we once again use `if(TRUE) {this} else {that}`. We can avoid filtering if "Show all" is selected in the "State" dropdown menu: 
+
+```{r}
+state_select <- 
+  'Show all'
+
+covid_trend <-
+  if(state_select == 'Show all') {
+    covid_adjusted_unadjusted
+  } else {
+    covid_adjusted_unadjusted %>% 
+      filter(state == state_select)
+  }
+```
+
+```{r}
+state_select <- 
+  'District of Columbia'
+
+covid_trend <-
+  if(state_select == 'Show all') {
+    covid_adjusted_unadjusted
+  } else {
+    covid_adjusted_unadjusted %>% 
+      filter(state == state_select)
+  }
+```
+
+... and plot the output based on whichever choice is made by the user:
+
+```{r}
+state_select <- 
+  'District of Columbia'
+
+covid_trend <-
+  if(state_select == 'Show all') {
+    covid_adjusted_unadjusted
+  } else {
+    covid_adjusted_unadjusted %>% 
+      filter(state == state_select)
+  }
+
+covid_trend %>% 
+  ggplot(
+    aes(x = date, 
+        y = n,
+        color = state)) +
+  geom_line() +
+  theme_minimal()
+```
+
+## Inputs
+
+With the skeleton of our app created and data wrangling steps tested, our next step is to create what is known as "shiny bound inputs". These are special input bindings that send commands to program R. The inputs allow users to adjust to explore the data in different ways. There are a lot of different types of inputs -- we'll just cover a few for this app (but see <a href = "https://shiny.rstudio.com/tutorial/written-tutorial/lesson3/" target = "_blank">this reference</a> for more). 
+
+Inputs are passed to the server as a list object. Items in the list are how the user controls the behavior of the app. Let's make a blank list to test each of our inputs and call the object `input_test`:
+
+```{r}
+input_test <- 
+  list()
+```
+
+We'll use `input_test` to further test whether we can apply the data wrangling steps above to our app.
+
+### Radio buttons
+
+A radio button is an input that allows exclusive selection of values. In other words, if the radio button has two options, only one of the two may be chosen. In our app, we give users the option to choose view "Cases" or "Deaths". Add the following inside of the sidebar menu (*Be careful of where you place things! It's easy to miss a comma when working in shiny!*):
+
+```{r, eval = FALSE}
+radioButtons(
+  inputId = 'metric',
+  label = 'View:',
+  choiceValues = c('Cases' =  'cases',
+                   'Deaths' = 'deaths'))
+```
+
+Here, we provided an `inputId`, which is the name of the input that is sent to the server, and label, which is the name of the input as printed in the website. In the `choiceValues = ` argument, we provided a named atomic vector where the name of each value represents the label on the website.
+
+Have a closer look at the vector of choices:
+
+```{r}
+c('Cases' =  'cases',
+  'Deaths' = 'deaths')
+```
+
+Let's assign the `metric` to `input_test` and assign the value "cases" to the object:
+
+```{r}
+input_test$metric <- 'cases'
+```
+
+Let's apply this input to our first data wrangling step, subsetting the data to cases:
+
+```{r}
+covid_states %>% 
+  filter(metric == input_test$metric)
+```
+
+### Date range input
+
+We'll next create a **date range input**. This will be used to subset Covid data to dates within a specified range. Add the following inside of the sidebar menu:
+
+```{r, eval = FALSE}
+dateRangeInput(
+  inputId = 'date_range',
+  label = 'Select a range of dates:',
+  start = '2020-01-21')
+```
+
+In the above, I provided a unique identifier (`inputId`) for the object ('date_range'), a label to print on the website, and the default first date in the range. I chose '2020-01-21' because it was the first date in which a Covid case was found in the United States. By default, the last date in the range will be the current date of the website user's computer.
+
+The output of the dateRangeInput is an atomic vector object with two dates (the first and last date chosen by the user). Let's add this object to our `input_test` list:
+
+```{r}
+input_test$date_range <-
+  c(as_date('2022-01-01'),
+    today())
+```
+
+And have a look:
+
+```{r}
+input_test$date_range
+```
+
+Recreating our date subsetting operation in the section above, we can subset the `covid_states` data by `metric` and `date_range` with:
+
+```{r}
+covid_states %>% 
+  filter(
+    metric == input_test$metric,
+    between(date,
+            input_test$date_range[1],
+            input_test$date_range[2]))
+```
+
+Notice that we extracted the first and last date by index here!
+
+We can now recreate our `covid_filtered` object using inputs rather than hard-coded values:
+
+```{r}
+covid_filtered <-
+  covid_states %>% 
+  filter(
+    metric == input_test$metric,
+    between(date,
+            input_test$date_range[1],
+            input_test$date_range[2])) %>% 
+  group_by(state) %>% 
+  mutate(n = n - min(n)) %>% 
+  ungroup()
+
+covid_filtered
+```
+
+### Checkbox input
+
+A checkbox input is an input in which a user can make multiple selections (i.e., the selections are not exclusive). Add the following inside of the sidebar menu:
+
+```{r, eval = FALSE}
+checkboxInput(
+  inputId = 'population_adjust',
+  label = 'Adjust for population?')
+```
+
+With a single checkbox input, you simply provide the name of the inputId and the label to print on the website.
+
+Checkbox inputs produce values of either TRUE or FALSE. Let's add our inputId `adjusted` to `input_test` with the value TRUE:
+
+```{r}
+input_test$adjusted <-
+  TRUE
+```
+
+This allows us to create our `covid_adjusted_unadjusted` object using inputs:
+
+```{r}
+covid_adjusted_unadjusted <-
+  if(input_test$adjusted) {
+    population_states %>% 
+      left_join(
+        covid_filtered,
+        by = 'state') %>% 
+      mutate(n = n*100/population)
+  } else {
+    covid_filtered
+  }
+```
+
+*Note: In the above, because `input_test$adjusted` is already a `TRUE` or `FALSE` value (and thus a logical value), no logical test needs to be applied.*
+
+### Select input (dropdown menu)
+
+The final input our app uses is a dropdown menu in which users may select states for the trend plot. Here, users may select from a list of options. Like most modern dropdown menus, the list of options is filtered as the user begins typing the name of their state of interest (e.g., typing "b" in the list of options will reduce the list to only states that contain a "b" in their name).
+
+Here, you provide a vector of choices for the user to select. For example:
+
+```{r, eval = FALSE}
+selectInput(
+  inputId = 'select_example',
+  label = 'Just an Example',
+  choices = c('a', 'b', 'c'))
+```
+
+We can also let the data itself provide the choices. In our app, we use the names of the states in the `us_states` file to define the choices. The question is "where do we put this?" This only applies to the `charts` tab. As such, `selectInput()` should not be placed in the sidebar menu. Instead, copy-and-paste this code inside of the `tabItem` for `charts`.
+
+```{r, eval = FALSE}
+selectInput(
+  inputId = 'state_select',
+  label = 'State',
+  choices = c('Show all',
+              sort(us_states$state)))
+```
+
+The choice value for the `inputId` is stored as a single character in the `input` list. Let's add the choice "District of Columbia" to our `input_test` list:
+
+```{r}
+input_test$state_select <-
+  "District of Columbia"
+```
+
+... and apply this to our wrangling code:
+
+```{r}
+covid_trend <-
+  if(input_test$state_select == 'Show all') {
+    covid_adjusted_unadjusted
+  } else {
+    covid_adjusted_unadjusted %>% 
+      filter(state == input_test$state_select)
+  }
+```
+
+Give a try at running your app. Below is my code for the current version. If your code doesn't successfully run, have a look at the code below to ensure that you've not missed something.
+
+```{r}
+# setup -----------------------------------------
+
+library(shiny)
+library(shinydashboard)
+
+# States shapefile, subset to the fields state 
+# name and abbreviation:
+
+us_states <-
+  st_read('data/us_states.geojson') %>% 
+  select(state = name_en, 
+         state_abbr = postal)
+
+# A bounding box for the tmap viewing window:
+
+conus_bbox <-
+  st_read('data/conus.shp') %>% 
+  st_bbox()
+
+# State populations in 2020:
+
+population_states <-
+  read_csv('data/co-est2020.csv') %>% 
+  filter(COUNTY == '000') %>% 
+  select(
+    state = STNAME,
+    population = POPESTIMATE2020)
+
+# URL for the New York Times GitHub page:
+
+nyt_covid_url <-
+  'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv'
+
+# ui --------------------------------------------
+
+ui <-
+  dashboardPage(
+    dashboardHeader(title = 'Covid app'),
+    dashboardSidebar(
+      sidebarMenu(
+        menuItem(
+          text = 'Overview', 
+          icon = icon('book'),
+          tabName = 'overview'),
+        
+        menuItem(
+          text = 'Map',
+          icon = icon('map'),
+          tabName = 'maps'),
+        
+        menuItem(
+          text = 'Table',
+          icon = icon('table'),
+          tabName = 'tables'),
+        
+        menuItem(
+          text = 'Trend',
+          icon = icon('chart-line'),
+          tabName = 'charts')),
+      hr(),
+      
+      radioButtons(
+        inputId = 'metric',
+        label = 'View:',
+        choiceNames = c('Cases', 'Deaths'),
+        choiceValues = c('cases', 'deaths')),
+      
+      dateRangeInput(
+        inputId = 'date_range',
+        label = 'Select a range of dates:',
+        start = '2021-01-21'),
+      
+      checkboxInput(
+        inputId = 'population_adjust',
+        label = 'Adjust for population?')),
+    
+    dashboardBody(
+      tags$head(
+        tags$link(
+          rel = 'stylesheet',
+          type = 'text/css',
+          href = 'dashboard_styles.css')),
+      
+      tabItems(
+        
+        tabItem(
+          tabName = 'overview',
+          h2('Overview'),
+          p('Here is an example shiny application that uses a dahsboard interface. We will use this app to explore data on the temporal and spatial distribution of Covid-19.'),
+          p('Click the menu items in the sidebar menu on the left to explore what this app can do!')),
+        
+        tabItem(
+          tabName = 'maps',
+          h2('Maps')),
+        
+        tabItem(
+          tabName = 'tables',
+          h2('Tables')),
+        
+        tabItem(
+          tabName = 'charts',
+          h2('Trend'),
+          selectInput(
+            inputId = 'state_select',
+            label = 'State',
+            choices = c('Show all',
+                        sort(us_states$state))))
+      )))
+
+# server ----------------------------------------
+
+server <-
+  function(input, output) { 
+    
+    # Daily covid data from the New York Times:
+    
+    covid_states <-
+      read_csv(nyt_covid_url) %>% 
+      select(-fips) %>% 
+      pivot_longer(cases:deaths, 
+                   names_to = 'metric',
+                   values_to = 'n')
+  }
+
+# knit and run app ------------------------------
+
+shinyApp(ui, server)
+
+```
+
+We've got the skeleton of our UI built and our inputs set and tested. Now it's time to head to the server make our app do something!
+
+## The server - reactivity
+
+The server is where we run program R and send output back to the UI. If we've been careful up to now (we have), the server isn't too challenging for simple apps like this one.
+
+One of the key concepts, or perhaps **the** key concept, when working with the server is **reactive objects**. A reactive object is one that *can* change as user inputs change. A reactive object is technically a function ... nothing is evalutated until the function is explicitly called. We've secretly been laying the groundwork for our reactive objects throughout the last section. Now let's make them for real.
+
+### Creating a reactive object
+
+In the last section, we created our filtered data as such:
+
+```{r, eval = FALSE}
+covid_filtered <-
+  covid_states %>% 
+  filter(
+    metric == input_test$metric,
+    between(date,
+            input_test$date_range[1],
+            input_test$date_range[2])) %>% 
+  group_by(state) %>% 
+  mutate(n = n - min(n)) %>% 
+  ungroup()
+```
+
+To make this into a *reactive object*, we simply change `input_test` to `input`, then wrap the function inside of `reactive({})`:
+
+```{r, eval = FALSE}
+covid_filtered <-
+  reactive({
+    covid_states %>% 
+      filter(
+        metric == input$metric,
+        between(date,
+                input$date_range[1],
+                input$date_range[2])) %>% 
+      group_by(state) %>% 
+      mutate(n = n - min(n)) %>% 
+      ungroup()
+  })
+```
+
+Paste the above inside the server function, below `covid_states`. Here's a snippet:
+
+```{r, eval = FALSE}
+server <-
+  function(input, output) { 
+    
+    # Daily covid data from the New York Times:
+    
+    covid_states <-
+      read_csv(nyt_covid_url) %>% 
+      select(-fips) %>% 
+      pivot_longer(cases:deaths, 
+                   names_to = 'metric',
+                   values_to = 'n')
+    
+    # Filter covid_states by metric and time span:
+    
+    covid_filtered <-
+      reactive({
+        covid_states %>% 
+          filter(
+            metric == input$metric,
+            between(date,
+                    input$date_range[1],
+                    input$date_range[2])) %>% 
+          group_by(state) %>% 
+          mutate(n = n - min(n)) %>% 
+          ungroup()
+      })
+  }
+```
+
+The next object we created was `covid_adjusted_unadjusted`:
+
+```{r, eval = FALSE}
+covid_adjusted_unadjusted <-
+  if(input_test$adjusted) {
+    population_states %>% 
+      left_join(
+        covid_filtered,
+        by = 'state') %>% 
+      mutate(n = n*100/population)
+  } else {
+    covid_filtered
+  }
+```
+
+The above doesn't work directly out-of-the-box. The object `covid-filtered` is a function. Recall that we execute a function with `function_name()`. Here we need to specify this as a reactive function, change `input_test` to `input`, **and** add parentheses after `covid_filtered()`:
+
+```{r, eval = FALSE}
+covid_adjusted_unadjusted <-
+  reactive({
+    if(input$adjusted) {
+      population_states %>% 
+        left_join(
+          covid_filtered(),
+          by = 'state') %>% 
+        mutate(n = n*100/population)
+    } else {
+      covid_filtered()
+    }
+  })
+```
+
+Here's how it should look inside of the server script:
+
+```{r, eval = FALSE}
+server <-
+  function(input, output) { 
+    
+    # Daily covid data from the New York Times:
+    
+    covid_states <-
+      read_csv(nyt_covid_url) %>% 
+      select(-fips) %>% 
+      pivot_longer(cases:deaths, 
+                   names_to = 'metric',
+                   values_to = 'n')
+    
+    # Filter covid_states by metric and time span:
+    
+    covid_filtered <-
+      reactive({
+        covid_states %>% 
+          filter(
+            metric == input$metric,
+            between(date,
+                    input$date_range[1],
+                    input$date_range[2])) %>% 
+          group_by(state) %>% 
+          mutate(n = n - min(n)) %>% 
+          ungroup()
+      })
+    
+    # Filter to values adjusted by population (or don't):
+    
+    covid_adjusted_unadjusted <-
+      reactive({
+        if(input$adjusted) {
+          population_states %>% 
+            left_join(
+              covid_filtered(),
+              by = 'state') %>% 
+            mutate(n = n*100/population)
+        } else {
+          covid_filtered()
+        }
+      })
+  }
+```
+
+We can use our `covid_adjusted_unadjusted()` reactive object to create a new reactive object, `covid_summarized`. We did this in the wrangling section with:
+
+```{r, eval = FALSE}
+covid_adjusted_unadjusted %>% 
+  group_by(state) %>% 
+  summarize(n = max(n))
+```
+
+Because the data the summary code chunk is based on is dependent on user input, it must be turned into a reactive object. Because the data it is dependent on, `covid_adjusted_unadjusted`, is reactive, it must be followed with `()`:
+
+```{r, eval = FALSE}
+covid_summarized <- 
+  reactive({
+    covid_adjusted_unadjusted() %>% 
+      group_by(state) %>% 
+      summarize(n = max(n))
+  })
+```
+
+Here's how it should look inside of the server:
+
+```{r, eval = FALSE}
+server <-
+  function(input, output) { 
+    
+    # Daily covid data from the New York Times:
+    
+    covid_states <-
+      read_csv(nyt_covid_url) %>% 
+      select(-fips) %>% 
+      pivot_longer(cases:deaths, 
+                   names_to = 'metric',
+                   values_to = 'n')
+    
+    # Filter covid_states by metric and time span:
+    
+    covid_filtered <-
+      reactive({
+        covid_states %>% 
+          filter(
+            metric == input$metric,
+            between(date,
+                    input$date_range[1],
+                    input$date_range[2])) %>% 
+          group_by(state) %>% 
+          mutate(n = n - min(n)) %>% 
+          ungroup()
+      })
+    
+    # Filter to values adjusted by population (or don't):
+    
+    covid_adjusted_unadjusted <-
+      reactive({
+        if(input$adjusted) {
+          population_states %>% 
+            left_join(
+              covid_filtered(),
+              by = 'state') %>% 
+            mutate(n = n*100/population)
+        } else {
+          covid_filtered()
+        }
+      })
+    
+    # Summarize for table and map:
+    
+    covid_summarized <- 
+      reactive({
+        covid_adjusted_unadjusted() %>% 
+          group_by(state) %>% 
+          summarize(n = max(n))
+      })
+  }
+```
+
+As a final step in the data wrangling process, we subset the data by state:
+
+```{r, eval = FALSE}
+state_select <- 
+  'Show all'
+
+covid_trend <-
+  if(state_select == 'Show all') {
+    covid_adjusted_unadjusted
+  } else {
+    covid_adjusted_unadjusted %>% 
+      filter(state == state_select)
+  }
+```
+
+Here, we need to change `covid_trend` to a reactive object, add parentheses after `covid_adjusted_unadjusted`, and modify the `state_select` to `input_test$state_select`:
+
+```{r, eval = FALSE}
+covid_trend <-
+  reactive({
+    if(input_test$state_select == 'Show all') {
+      covid_adjusted_unadjusted()
+    } else {
+      covid_adjusted_unadjusted() %>% 
+        filter(state == input_test$state_select)
+    }
+  })
+```
+
+And here's the function inside of the server:
+
+```{r, eval = FALSE}
+server <-
+  function(input, output) { 
+    
+    # Daily covid data from the New York Times:
+    
+    covid_states <-
+      read_csv(nyt_covid_url) %>% 
+      select(-fips) %>% 
+      pivot_longer(cases:deaths, 
+                   names_to = 'metric',
+                   values_to = 'n')
+    
+    # Filter covid_states by metric and time span:
+    
+    covid_filtered <-
+      reactive({
+        covid_states %>% 
+          filter(
+            metric == input$metric,
+            between(date,
+                    input$date_range[1],
+                    input$date_range[2])) %>% 
+          group_by(state) %>% 
+          mutate(n = n - min(n)) %>% 
+          ungroup()
+      })
+    
+    # Filter to values adjusted by population (or don't):
+    
+    covid_adjusted_unadjusted <-
+      reactive({
+        if(input$adjusted) {
+          population_states %>% 
+            left_join(
+              covid_filtered(),
+              by = 'state') %>% 
+            mutate(n = n*100/population)
+        } else {
+          covid_filtered()
+        }
+      })
+    
+    # Summarize for table and map:
+    
+    covid_summarized <- 
+      reactive({
+        covid_adjusted_unadjusted() %>% 
+          group_by(state) %>% 
+          summarize(n = max(n))
+      })
+    
+    # Filter trend data by state (or not):
+    
+    covid_trend <-
+      reactive({
+        if(input_test$state_select == 'Show all') {
+          covid_adjusted_unadjusted()
+        } else {
+          covid_adjusted_unadjusted() %>% 
+            filter(state == input_test$state_select)
+        }
+      })
+  }
+```
+
+We *could* run the whole script with the now-modified server, but we'd be pretty disappointed. We haven't specified any outputs yet, so it would look exactly the same as before!
+
+## Outputs
+
+Our final tasks involve outputs. On the UI side, we have to create containers for the outputs. On the server side, we have to generate the code that provides the data for the output containers.
+
+### Outputs in the UI
+
+Let's work with the user interface first.  Here, our job is to define the type of output we'd like to show and provide the `outputId` that the server uses to communicate output information.
+
+We have three outputs for this app: a map, a table, and a plot. Each of our outputs will be provided inside of their associated `tabItem()` within the larger `tabItems()` function (which itself is inside of the `dashboardBody()`). This is one annoyance I have with shiny -- I work to avoid deeply nested functions in my code. Unfortunately, you currently have little choice when using shiny apps -- there are either a lot of assignments or super deep nesting. Hopefully, an update to the package will make my complaint null and void (but I'm not holding my breath for that one).
+
+Let's first add an output for our tmap using the `tmapOutput()` function inside of the user interface:
+
+```{r, eval = FALSE}
+tabItem(
+  tabName = 'maps',
+  h2('Map'),
+  tmapOutput(outputId = 'covid_map')),
+```
+
+Take special note of the `outputId = ` argument. This output id **must** match the output id in the server. I can't begin to describe how much time I've lost due to non-matching output ids.
+
+We specify the function `dataTableOutput()` for tabular data output:
+
+```{r, eval = FALSE}
+tabItem(
+  tabName = 'tables',
+  h2('Summary table'),
+  dataTableOutput(outputId = 'summary_table')),
+```
+
+... and use `plotOutput()` for the, well, plot output:
+
+```{r, eval = FALSE}
+tabItem(
+  tabName = 'charts',
+  h2('Trend'),
+  selectInput(
+    inputId = 'state_select',
+    label = 'State',
+    choices = c('Show all',
+                sort(us_states$state))),
+  plotOutput(outputId = 'plot_output'))
+```
+
+Putting this all together, your UI should look like this:
+
+```{r, eval = FALSE}
+ui <-
+  dashboardPage(
+    dashboardHeader(title = 'Covid app'),
+    dashboardSidebar(
+      sidebarMenu(
+        menuItem(
+          text = 'Overview', 
+          icon = icon('book'),
+          tabName = 'overview'),
+        
+        menuItem(
+          text = 'Map',
+          icon = icon('map'),
+          tabName = 'maps'),
+        
+        menuItem(
+          text = 'Table',
+          icon = icon('table'),
+          tabName = 'tables'),
+        
+        menuItem(
+          text = 'Trend',
+          icon = icon('chart-line'),
+          tabName = 'charts')),
+      hr(),
+      
+      radioButtons(
+        inputId = 'metric',
+        label = 'View:',
+        choiceNames = c('Cases', 'Deaths'),
+        choiceValues = c('cases', 'deaths')),
+      
+      dateRangeInput(
+        inputId = 'date_range',
+        label = 'Select a range of dates:',
+        start = '2021-01-21'),
+      
+      checkboxInput(
+        inputId = 'population_adjust',
+        label = 'Adjust for population?')),
+    
+    dashboardBody(
+      tags$head(
+        tags$link(
+          rel = 'stylesheet',
+          type = 'text/css',
+          href = 'dashboard_styles.css')),
+      
+      tabItems(
+        
+        tabItem(
+          tabName = 'overview',
+          h2('Overview'),
+          p('Here is an example shiny application that uses a dahsboard interface. We will use this app to explore data on the temporal and spatial distribution of Covid-19.'),
+          p('Click the menu items in the sidebar menu on the left to explore what this app can do!')),
+        
+        tabItem(
+          tabName = 'maps',
+          h2('Maps'),
+          tmapOutput(outputId = 'covid_map')),
+        
+        tabItem(
+          tabName = 'tables',
+          h2('Tables'),
+          dataTableOutput(outputId = 'summary_table')),
+        
+        tabItem(
+          tabName = 'charts',
+          h2('Trend'),
+          selectInput(
+            inputId = 'state_select',
+            label = 'State',
+            choices = c('Show all',
+                        sort(us_states$state))),
+          plotOutput(outputId = 'plot_output'))
+      )))
+```
+
+It's still not worth running the above within the larger app file -- we've not yet sent anything to the outputs!
+
+### Outputs from the Server
+
+With our output containers created, we're now ready to fill them.
+
+#### tmap output
+
+Our first task will be to generate the output map. In our wrangling section, we created the map using this code:
+
+```{r}
+us_states %>% 
+  left_join(covid_summarized, 
+            by = 'state') %>% 
+  tm_shape() +
+  tm_polygons(col = 'n') +
+  tm_view(bbox = conus_bbox)
+```
+
+... but now `covid_summarized` is a reactive object! We need to call our reactive object with `covid_summarized()`. We use the function `renderTmap()` to turn the output into an html-ready file. Importantly, we assign the data to a list object called output with the **same name** as the output object created for our map:
+
+```{r, eval = FALSE}
+output$covid_map <-
+  renderTmap(
+    us_states %>% 
+      left_join(
+        covid_summarized(),
+        by = 'state') %>% 
+      tm_shape() +
+      tm_polygons(col = 'n') +
+      tm_view(bbox = conus_bbox))
+```
+
+Here's how it looks within the larger server function:
+
+```{r, eval = FALSE}
+server <- 
+  function(input, output) { 
+    
+    # Get covid data. We place it hear so that the most recent data is 
+    # read in at the start of an app instance:
+    
+    covid_states <-
+      read_csv(nyt_covid_url) %>% 
+      select(-fips) %>% 
+      pivot_longer(cases:deaths, 
+                   names_to = 'metric',
+                   values_to = 'n')
+    
+    # Data subsetting and summarizing -------------------------------------
+    
+    # Filter data by metric and date range:
+    
+    covid_filtered <-
+      reactive({
+        covid_states %>% 
+          filter(
+            metric == input$metric,
+            between(as_date(date),
+                    as_date(input$date_range[1]),
+                    as_date(input$date_range[2])))
+      })
+    
+    # Adjust for population if checked:
+    
+    covid_adjusted <-
+      reactive({
+        if (input$population_adjust) {
+          covid_filtered() %>% 
+            left_join(population_states,
+                      by = 'state') %>% 
+            mutate(n = n/population*100) %>% 
+            select(-population)
+        } else {
+          covid_filtered()
+        }
+      })
+    
+    # Summarize data for map and summary table:
+    
+    covid_summarized <-
+      reactive({
+        covid_adjusted() %>% 
+          group_by(state) %>% 
+          summarize(n = max(n) - min(n))
+      })
+    
+    # Adjust for population if checked:
+    
+    # Trend data:
+    
+    covid_trend <-
+      reactive({
+        if (input$state_select == 'Show all') {
+          covid_adjusted() 
+        } else {
+          covid_adjusted() %>% 
+            filter(state == input$state_select)
+        }
+      })
+    
+    # Outputs -------------------------------------------------------------
+    
+    # Map:
+    
+    output$covid_map <-
+      renderTmap(
+        us_states %>% 
+          left_join(
+            covid_summarized(),
+            by = 'state') %>% 
+          tm_shape() +
+          tm_polygons(col = 'n') +
+          tm_view(bbox = conus_bbox))
+  }
+```
+
+#### tabular output
+
+Let's look again at how we created our summary table in the wrangling section:
+
+```{r}
+covid_adjusted_unadjusted %>% 
+  group_by(state) %>% 
+  summarize(n = max(n))
+```
+
+We created a reactive object called `covid_summarized()`. We can use this, in conjunction with the function `dataTableOutput()` to generate an output table for our app, with the output binding `output$summary_table`:
+
+```{r, eval = FALSE}
+output$summary_table <-
+      renderDataTable(
+        covid_summarized())
+```
+
+Here's how it looks in the server function:
+
+```{r, eval = FALSE}
+server <- 
+  function(input, output) { 
+    
+    # Get covid data. We place it hear so that the most recent data is 
+    # read in at the start of an app instance:
+    
+    covid_states <-
+      read_csv(nyt_covid_url) %>% 
+      select(-fips) %>% 
+      pivot_longer(cases:deaths, 
+                   names_to = 'metric',
+                   values_to = 'n')
+    
+    # Data subsetting and summarizing -------------------------------------
+    
+    # Filter data by metric and date range:
+    
+    covid_filtered <-
+      reactive({
+        covid_states %>% 
+          filter(
+            metric == input$metric,
+            between(as_date(date),
+                    as_date(input$date_range[1]),
+                    as_date(input$date_range[2])))
+      })
+    
+    # Adjust for population if checked:
+    
+    covid_adjusted <-
+      reactive({
+        if (input$population_adjust) {
+          covid_filtered() %>% 
+            left_join(population_states,
+                      by = 'state') %>% 
+            mutate(n = n/population*100) %>% 
+            select(-population)
+        } else {
+          covid_filtered()
+        }
+      })
+    
+    # Summarize data for map and summary table:
+    
+    covid_summarized <-
+      reactive({
+        covid_adjusted() %>% 
+          group_by(state) %>% 
+          summarize(n = max(n) - min(n))
+      })
+    
+    # Adjust for population if checked:
+    
+    # Trend data:
+    
+    covid_trend <-
+      reactive({
+        if (input$state_select == 'Show all') {
+          covid_adjusted() 
+        } else {
+          covid_adjusted() %>% 
+            filter(state == input$state_select)
+        }
+      })
+    
+    # Outputs -------------------------------------------------------------
+    
+    # Map:
+    
+    output$covid_map <-
+      renderTmap(
+        us_states %>% 
+          left_join(
+            covid_summarized(),
+            by = 'state') %>% 
+          tm_shape() +
+          tm_polygons(col = 'n') +
+          tm_view(bbox = conus_bbox))
+    
+    # Summary table:
+    
+    output$summary_table <-
+      renderDataTable(
+        covid_summarized())
+  }
+
+# knit and run app --------------------------------------------------------
+
+shinyApp(ui, server)
+```
+
+#### plot output
+
+Finally, for our plot output, we previously used:
+
+```{r}
+state_select <- 
+  'District of Columbia'
+
+covid_trend <-
+  if(state_select == 'Show all') {
+    covid_adjusted_unadjusted
+  } else {
+    covid_adjusted_unadjusted %>% 
+      filter(state == state_select)
+  }
+
+covid_trend %>% 
+  ggplot(
+    aes(x = date, 
+        y = n,
+        color = state)) +
+  geom_line() +
+  theme_minimal()
+```
+
+In the reactive shiny app, we specify our data as `covid_trend()` and define our plot's output as `plot_output`:
+
+```{r, eval = FALSE}
+output$plot_output <-
+  renderPlot(
+    covid_trend() %>% 
+      ggplot(
+        aes(x = date, 
+            y = n,
+            color = state)) +
+      geom_line() +
+      theme_minimal())
+```
+
+... and here's how it looks in the **final** app file (complete!):
+
+```{r, message = FALSE, warning = FALSE}
+
+# setup -------------------------------------------------------------------
+
+library(lubridate)
+library(sf)
+library(tmap)
+library(shiny)
+library(shinydashboard)
+library(tidyverse)
+
+# data --------------------------------------------------------------------
+
+# Read in covid data from New York Times:
+
+nyt_covid_url <-
+  'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv'
+
+# Get start date from NY Times:
+
+start_date <-
+  read_csv(nyt_covid_url) %>% 
+  pull(date) %>% 
+  min()
+
+# Read in population data from us census:
+
+population_states <-
+  read_csv('data/co-est2020.csv') %>% 
+  filter(COUNTY == '000') %>% 
+  select(
+    state = STNAME,
+    population = POPESTIMATE2020)
+
+# Read in shapefiles:
+
+us_states <-
+  st_read('data/us_states.geojson',
+          quiet = TRUE) %>% 
+  transmute(
+    state = name,
+    state_abbr = str_remove(iso_3166_2, 'US-'))
+
+conus_bbox <-
+  st_read('data/conus.shp',
+          quiet = TRUE) %>% 
+  st_bbox()
+
+# user interface ----------------------------------------------------------
+
+ui <- 
+  dashboardPage(
+    
+    dashboardHeader(title = 'Covid app'),
+    
+    dashboardSidebar(
+      sidebarMenu(
+        
+        menuItem(
+          'Overview',
+          tabName = 'overview',
+          icon = icon('book')),
+        
+        menuItem('Map',
+                 icon = icon('map'),
+                 tabName = 'maps'),
+        
+        menuItem('Table',
+                 icon = icon('table'),
+                 tabName = 'tables'),
+        
+        menuItem('Trend',
+                 icon = icon('chart-line'),
+                 tabName = 'charts')),
+      hr(),
+      radioButtons(
+        inputId = 'metric',
+        label = 'View:',
+        choiceNames = c('Cases', 'Deaths'),
+        choiceValues = c('cases', 'deaths')),
+      
+      dateRangeInput(
+        inputId = 'date_range',
+        label = 'Select a range of dates:',
+        start = start_date),
+      
+      checkboxInput(
+        inputId = 'population_adjust',
+        label = 'Adjust for population?'),
+      
+      collapsed = FALSE
+    ),
+    
+    dashboardBody(
+      tags$head(
+        tags$link(
+          rel = 'stylesheet',
+          type = 'text/css',
+          href = 'dashboard_styles.css'
+        )
+      ),
+      
+      tabItems(
+        
+        tabItem(
+          tabName = 'overview',
+          h2('Overview'),
+          p('Here is an example shiny application that uses a dahsboard interface. We will use this app to explore data on the temporal and spatial distribution of Covid-19.'),
+          p('Click the menu items in the sidebar menu on the left to explore what this app can do!')),
+        
+        tabItem(
+          tabName = 'maps',
+          h2('Map'),
+          tmapOutput(outputId = 'covid_map')),
+        
+        tabItem(
+          tabName = 'tables',
+          h2('Summary table'),
+          dataTableOutput(outputId = 'summary_table')),
+        
+        tabItem(
+          tabName = 'charts',
+          h2('Trend'),
+          selectInput(
+            inputId = 'state_select',
+            label = 'State',
+            choices = c('Show all',
+                        sort(us_states$state))),
+          plotOutput(outputId = 'plot_output'))
+      )
+    )
+  )
+
+# server ------------------------------------------------------------------
+
+server <- 
+  function(input, output) { 
+    
+    # Get covid data. We place it hear so that the most recent data is 
+    # read in at the start of an app instance:
+    
+    covid_states <-
+      read_csv(nyt_covid_url) %>% 
+      select(-fips) %>% 
+      pivot_longer(cases:deaths, 
+                   names_to = 'metric',
+                   values_to = 'n')
+    
+    # Data subsetting and summarizing -------------------------------------
+    
+    # Filter data by metric and date range:
+    
+    covid_filtered <-
+      reactive({
+        covid_states %>% 
+          filter(
+            metric == input$metric,
+            between(as_date(date),
+                    as_date(input$date_range[1]),
+                    as_date(input$date_range[2])))
+      })
+    
+    # Adjust for population if checked:
+    
+    covid_adjusted <-
+      reactive({
+        if (input$population_adjust) {
+          covid_filtered() %>% 
+            left_join(population_states,
+                      by = 'state') %>% 
+            mutate(n = n/population*100) %>% 
+            select(-population)
+        } else {
+          covid_filtered()
+        }
+      })
+    
+    # Summarize data for map and summary table:
+    
+    covid_summarized <-
+      reactive({
+        covid_adjusted() %>% 
+          group_by(state) %>% 
+          summarize(n = max(n) - min(n))
+      })
+    
+    # Adjust for population if checked:
+    
+    # Trend data:
+    
+    covid_trend <-
+      reactive({
+        if (input$state_select == 'Show all') {
+          covid_adjusted() 
+        } else {
+          covid_adjusted() %>% 
+            filter(state == input$state_select)
+        }
+      })
+    
+    # Outputs -------------------------------------------------------------
+    
+    # Map:
+    
+    output$covid_map <-
+      renderTmap(
+        us_states %>% 
+          left_join(
+            covid_summarized(),
+            by = 'state') %>% 
+          tm_shape() +
+          tm_polygons(col = 'n') +
+          tm_view(bbox = conus_bbox))
+    
+    # Summary table:
+    
+    output$summary_table <-
+      renderDataTable(
+        covid_summarized())
+    
+    # Plot:
+    
+    output$plot_output <-
+      renderPlot(
+        covid_trend() %>% 
+          ggplot(
+            aes(x = date, 
+                y = n,
+                color = state)) +
+          geom_line() +
+          theme_minimal())
+  }
+
+# knit and run app --------------------------------------------------------
+
+shinyApp(ui, server)
+```
+
+## Before we go
+
+I should note that this app **still** just scratches the surface of shiny app creation. Most egregiously, I didn't even touch on the notion of "observers" (a fundamental concept for shiny apps) nor how to publish a shiny app. Shiny apps are a challenging, but rewarding, way to communicate data. I highly recommend Hadley Wickham's <a href = "https://mastering-shiny.org/" target = "_blank">Mastering Shiny</a> if you would like to pursue generating shiny apps for your work.
+
+<script>
+var acc = document.getElementsByClassName("accordion");
+var i;
+
+for (i = 0; i < acc.length; i++) {
+acc[i].addEventListener("click", function () {
+this.classList.toggle("active");
+var panel = this.nextElementSibling;
+if (panel.style.display === "block") {
+panel.style.display = "none";
+} else {
+panel.style.display = "block";
+}
+});
+}
+</script>

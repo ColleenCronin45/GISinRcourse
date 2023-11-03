@@ -1,0 +1,53 @@
+---
+title: "Introduction to Markdown"
+output: 
+  html_document:
+    css: "my_style.css"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  eval = TRUE,
+  echo = TRUE)
+```
+
+<h1>Heading level 1, html</h1>
+
+# Heading level 1, markdown
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE, cache = TRUE, fig.width = 4, fig.asp = 1, fig.align = "center"}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+## Markdown lists
+
+Unordered list
+
+* boy
+* howdy
+
+Ordered list
+
+1. hello
+1. world
+
+## Styling markdown text
+
+Text can be *italic*, **bold**, <span style = "color:red">different colors</span>, or <span style ="font-size:24px; color:blue">different sizes</span>.
+

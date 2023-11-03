@@ -1,0 +1,285 @@
+---
+title: "Problem set 1"
+author: "Colleen Cronin"
+date: "08/27/2023"
+output: html_document
+---
+
+This is an R Markdown file. Below there are several things that I will ask you to add or modify. Along the way, I'm going to include new R Markdown methods to help expand your R Markdown toolkit.
+
+<span style = "color: red;">**[0.5]**</span> Please start by editing the YAML section above. Add your own name and the date that you completed this problem_set.
+
+<span style = "color: red;">**[0.5]**</span> Please save this document in your project folder, inside of the `problem_sets` folder with the naming convention "problem_set_1_[your last name]_[your first name].rmd". In other words, I would save this file as "problem_set_1_Evans_Brian.rmd".
+
+*Note: In the above, I used the `<span></span>` tag to define the color of a portion of the text.*
+
+<br>
+
+## Code chunks
+<hr>
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The above is called a "code chunk". Code chunks begin with three back-ticks, then curly braces, a set of instructions for the chunk, and options for running the chunk or styling the output.
+
+Inside the curly brackets (`{}`):
+
+* The first argument species the program that you are calling, which is in this case `r`. 
+* The second argument, which is separate by a space from your program argument, provides a label for your code chunk. Here, I'm providing the label "`setup`".
+* The next argument, separated by a comma, provides **options** for the chunk. Here, I'm using `include = TRUE` to specify that I want to include the code in the knitted document.
+
+Modify the code chunk above by setting the `include` option to `FALSE` to see the difference. <span style = "color: red;">**[0.25]**</span>
+
+Let's now think about the code that is running inside of the chunk:
+
+* `knitr::opts_chunk` is calling a list named `opts_chunk` from the package `knitr`. 
+* The double-colon operator (`::`) allows us to call functions and other objects with a package without explicitly loading the package (e.g., `library(knitr)`). 
+* The dollar sign (`$`) is used to extract an object from the `opts_chunk` list by name -- here, it is extracting the function `set`. 
+* The `set` function allows us to set the options for all of the code chunks in a document. 
+* We're defining the "`echo`" option -- this option determines whether only the output of an operation should be shown (`echo = FALSE`). Here, the code tells `knitr` to print both the code and the output (`echo = TRUE`).
+
+Modify the code chunk below such that only the output is printed in the knitted document <span style = "color: red;">**[0.25]**</span>:
+
+```{r simple_math, echo = FALSE}
+1 + 1
+```
+
+The code chunk below loads the tidyverse meta-package. This allows the document to call on tidyverse functions and data -- this is necessary even if a package has been loaded in your R session!
+
+Notice in the knitted document that there is a lot of printed output that we probably don't want to show. The additional printed output is defined by the chunk option `message` -- by default, this chunk option is `message = TRUE`. Change this option to FALSE and knit the document to see what happens. <span style = "color: red;">**[0.25]**</span>
+
+```{r load_library, message = FALSE}
+library(tidyverse)
+```
+
+### Add a new code chunk
+
+R packages often contain data that can be called directly once the library has been loaded. The data set `fruit` is a character vector that became available in this session if you correctly loaded the tidyverse package.
+
+Insert a new code chunk below (Windows: Ctrl+Alt+I, Mac: Command+Option+I). Inside the chunk, use indexing (*Note: Pre-course material*) to subset the `fruit` vector to the first four values and assign the name `my_fruit` to the resultant object. <span style = "color: red;">**[0.5]**</span>
+
+```{r}
+my_fruit <- fruit[1:4]
+  
+```
+
+
+### Code chunks and knitting issues
+
+Sometimes errors occur when we try to knit a document. We'll get a message that says "<span font-family: monospace;>Execution halted</span>" and descriptive information on the code chunk in which the error occurred. By default, the chunk option for whether a code should be evaluated is `eval = TRUE`. 
+
+Try setting the `eval` chunk option to `TRUE` and see what happens when we try to knit the document:
+
+```{r, eval = FALSE}
+portal
+```
+
+Be sure to change this back to `eval = FALSE` before moving on!
+
+*Note: You may encounter problems when completing or trying to knit one of the weekly problem sets. Setting `eval = FALSE` will allow you to knit your file even if there are errors in the code. Use this trick sparingly and be sure that any code chunk that does not produce an error can be evaluated!*
+
+You can modify multiple code chunk options at once by separating each option with a comma. Set `eval` to `FALSE` and watch what happens! <span style = "color: red;">**[0.25]**</span>
+
+```{r nerd_phrase, echo = FALSE, eval = FALSE}
+"hello world"
+```
+
+### Code chunks for styling css:
+
+We can use code chunks to modify the css of our document (cascading style sheet). This determines the style elements of a document by defining the style associated with individual html tags.
+
+* We can change a single element like this. Here, I change the font size of the html tag p to 18. `<p>` makes a paragraph.
+
+```{css css_p}
+p {
+ font-size: 18px;
+}
+```
+
+* You can style multiple elements at once, separating each tag with a comma. `<ul>` is the tag for unordered list (bullet points), and `<ol>` is the tag for ordered lists (numbers).
+
+```{css css_lists}
+ul, ol {
+ font-size: 16px;
+}
+```
+
+* `<pre>` is the html tag for code blocks:
+
+```{css css_pre}
+pre {
+ margin-top: 30px;
+ margin-bottom: 30px;
+ background-color: #e6f2ff;
+}
+```
+
+You can "comment out" css code chunks using `/* ... */`. Below, I've added some styling to headings of this document using css but I've commented out the first css statement. Un-comment that portion of the code (the one that defines the style of `h1` and `h2` tags) and knit it again to see how the document changes. <span style = "color: red;">**[0.5]**</span> 
+
+```{css headings_h1-2}
+h1, h2 {
+ color: #6082b6;
+}
+
+```
+
+Comment out the portion of the code below that defines the style of the third-level headings for the knitted document: <span style = "color: red;">**[0.5]**</span>
+
+```{css headings_h3}
+/*
+h3 {
+ color: #6495ed;
+ }*/
+```
+
+Add another css code chunk below. The html tags for items in a list is `<li>`. Provide a unique label (of your choice) to your chunk. In your code chunk, add padding to each list item. Set the padding-top to 8px. <span style = "color: red;">**[1.0]**</span>
+
+```{css lists_li}
+li {
+padding-top: 8px;
+}
+```
+
+
+<br>
+
+## About you (text elements)
+<hr>
+
+I like to fine tune course material to suit the needs and interests of my students. Providing your biographical information and computational skills below will help me get a better understanding of how to adapt the material for this course to you.
+
+### Your bio
+
+Please delete my information in the list below and add your own. <span style = "color: red;">**[1.5]**</span>
+
+* **My research focus/interest**: Wildlife conservation and One Health
+* **I am taking this class because**: I am an avid GIS user and would like to expand my coding abilities in R
+* **The topic I would most like to learn in this class**: I would like to learn to use R to enhance my flexibility in ArcGIS or as a way to do sptial analysis in relation to cartogrpahy
+* **One fun fact about me**: I had a root canal done in India
+* **One thing that people like about me**: I am an excellent gift giver
+* **One thing that people find annoying about me**: My ambitions outweigh my time availability<!-- Probably that I need to ask them "what do people find annoying about me" every time I come across these sorts of character assessments -->
+
+You can add a comment in an html document using `<!-- my comment -->`. For example, perhaps you don't appreciate being asked why people think you are annoying. You could sneak a comment to me like this:
+
+* **One thing that people find annoying about me**: Trick question, no one is annoyed by anything that I do<!-- I do not appreciate this question Brian -->
+
+See what happens when you knit this!
+
+### Your computational skillset
+
+It's also important to get a sense of the skills that students are coming in with. Below is a list of R tasks. Please modify this list by coloring a list item red if you have little or no previous experience with the list item. [**[1.0]**]{style="color: red;"}
+
+<!-- Note: In this above, I use a different way to define the span tag -- here, I surround my span inside of square brackets and define the style of the span using curly braces. You may choose to use either method for your R Markdown documents for this course.-->
+
+* <span style = "color: red;">**Not** being a super weirdo about R script formatting</span>
+* [pandas - Python Data Analysis Library]{style="color: red;"}
+* ggPlot
+* <span style = "color: red;">Writing in html
+* <span style = "color: red;">css
+* <span style = "color: red;">Shiny apps
+* Mutating data with dplyr
+* Data normalization principles (a.k.a. "Tidy data rules")
+* <span style = "color: red;">renv
+* Filtering data with dplyr
+* <span style = "color: red;">Bash commands
+* Joining data with dplyr
+* Using magrittr's pipe operator
+* <span style = "color: red;">Making Shiny apps
+* The RStudio IDE
+* <span style = "color: red;">Using R to analyze raster data
+* <span style = "color: red;">Leaflet
+* <span style = "color: red;">Lubridate
+* <span style = "color: red;">Regex
+* Working in R Studio projects
+* Stringr
+* <span style = "color: red;">Creating video lectures for this class
+
+### A picture of you
+
+You can use the html `<img>` tag to create a picture. Here, I'd like a picture of you, your pet, or something you like. Modify the html below to add your picture and provide your own caption. For this document to be share-able as is, you'll have to include a picture that is available on the internet. <span style = "color: red;">**[1.5]**</span>
+
+**Please note**: If you have your pictures stored in Google Photos you can use <a href = "https://www.labnol.org/embed/google/photos/" target = "_blank">this webpage</a> to get a embed link to a Google Photos. **Hey! Notice how we just created a hyperlink?**
+
+<figure>
+ <img 
+  src = "https://lh3.googleusercontent.com/pw/AIL4fc_CNwUKPbbmegHyABqp0uY9In8dfLl6EFRjT_SUNyg0rVCzqaR1zW0hxmStzfgfIbJP_Ho-EwJxIDkLG8-lUqtvFnzyC7VhWaAZoU3oVqjHtbsklaRI=w2400" 
+  style = "display: block;
+   margin-top: 24px;
+   margin-left: auto;
+   margin-right: auto;
+   width: 90%;">
+  <figcaption><br> The rare five-toed sloth feeding the two-toed sloth </figcaption>
+</figure>
+
+<br>
+
+## Playing in the band (tables)
+<hr>
+
+You can see data sets that are available to you (either in base R or in your packages) by typing `data()` in your console. Data that are in these packages can be called just by typing their name.
+
+We'll look at the `band_instruments` data set, which is in the dplyr package. Insert a new R code chunk and type the name of the data set to print its contents. 
+
+```{r}
+band_instruments
+```
+
+
+What if we wanted to see this as a nice html table though? There are a few options for doing so. Most are awful to deal with. I like using `knitr::kable()`:
+
+```{r basic_kable}
+knitr::kable(band_instruments)
+```
+
+### Nicer tables with kableExtra
+
+Now let's make a nicer table using the tools in the library kableExtra. We can use `kableExtra::kable_styling()` to modify our table.
+
+```{r better_kable}
+band_kable <-
+ knitr::kable(
+  band_instruments,
+  format = 'html')
+
+kableExtra::kable_styling(band_kable, 'striped')
+```
+
+### Even nicer tables with the Data table package
+
+Another option, which is a preference of mine, is to use `DT::datatable`. DT is a package that provides an R interface to the JavaScript DataTables library.
+
+```{r dt}
+DT::datatable(band_instruments)
+```
+
+It's a little silly in this context. We have a search box and pagination for a table with only three rows. The great thing about the DataTables JavaScript package is that you've got tons of controls. Here, I'll remove the paging and search feature:
+
+```{r better_dt}
+DT::datatable(
+ band_instruments,
+ options = list(paging = FALSE,
+         searching = FALSE))
+```
+
+Let's have you create a table of a different dataset. In your console, type `data(package = 'ggplot2')` to see what data sets are in ggplot. I found the data set `mpg` -- that's a pretty good one for this example. It has fuel economy data for cars for 1999 and 2008.
+
+```{r mpg_tibble}
+mpg
+```
+
+Add a code chunk that uses `DT::datatable()` to print the `mpg` data frame into an html table. Provide the unique label, of your choice, to the chunk. <span style = "color: red;">**[1.0]**</span>
+
+```{r mpg_html}
+DT::datatable(
+ mpg)
+```
+
+
+
+
+
+
+
+

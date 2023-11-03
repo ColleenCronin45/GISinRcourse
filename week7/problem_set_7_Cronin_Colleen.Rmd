@@ -1,0 +1,642 @@
+---
+title: "Problem set 7: A mountain holiday for Joe"
+author: "Colleen Cronin"
+date: "October 8, 2023"
+output: html_document
+---
+
+
+<!-- Please knit this right away! The additional information for (html and css)
+are provided to help you build on your current R Markdown toolbox. You will not
+be responsible for learning these additional tools at this point. -->
+
+<!-- The head tag, <head>, is a container for metadata in an html document. 
+We can use it to define styles and do lots of other cool things things. -->
+<head>
+<!-- The link tag, <link>, creates a relationship between this file and
+an external source. Here, I'm linking font-awesome so I can include a 
+couple of icons that I like (user-secret and user-circle) -->
+<link 
+  rel="stylesheet" 
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<!-- Here I'm linking to a javascript file that will give us access to font awesome -->
+  <script src="https://kit.fontawesome.com/03064bdd6c.js" crossorigin="anonymous"></script>
+</head>
+<!-- Note in the above that some html tags, like <head> need to be closed 
+with </head>. Others, like <link> don't need a closing tag. -->
+
+```{css, echo = FALSE}
+.score {
+  font-weight: bold;
+  font-size: 16px;
+  color: red;
+  background-color: #ffff80;
+}
+
+.subscore {
+  font-size: 14px;
+  color: red;
+}
+
+/* Accordion style, the accordion is the section "Functions that you may use in this assignment" */
+  
+.accordion {
+  background-color: #e6f0ff;
+  color: #000000;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border-style: solid;
+  border-width: 2px;
+  border-color: #ffffff;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+  transition: 0.4s;
+}
+
+/* When you hover your mouse over the accordion button, it changes color. */
+
+.active, .accordion:hover {
+  background-color: #80b3ff; 
+  color: #ffffff;
+  font-weight: bold;
+}
+
+/* This is where the content of the accordion is placed. */
+
+.panel {
+  padding: 0 18px;
+  display: none;
+  background-color: #eeffff;
+  overflow: hidden;
+}
+
+/* Here, I add a custom class for area surrounding the graded portions of this
+assignment.*/
+
+.now_you {
+  border-left: 8px solid #292093;
+  background-color: #e6ffff;
+  padding: 16px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+/* This is where tips and tricks are formatted. */
+
+.mysecret {
+  border: 1px solid #999999;
+  border-style: solid; 
+  background-color: #efefef;
+  padding: 20px; 
+  border-radius: 25px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+h1, h2 {
+  margin-bottom: 4px;
+}
+
+hr {
+  margin-top: 0px;
+}
+```
+
+<!-- Here is the setup for knitr. I had to include tidyverse so I could
+include a tidyverse example with my Important warning statement below-->
+
+```{r knitr_setup, include = FALSE}
+options(knitr.table.format = "html")
+
+knitr::opts_chunk$set(error = TRUE)
+```
+
+## Overview
+<hr>
+
+<div>
+
+<figure 
+  style = 
+    "float: right; 
+    padding-left: 2.5em; 
+    padding-bottom: 1em; 
+    padding-right: 0em; 
+    width: 50%; 
+    height: auto;">
+  <img  
+    src = "https://www.nps.gov/articles/000/images/black-bear-Glacier-Bay-NPS-resized.jpg?maxwidth=1200&autorotate=false&quality=78&format=webp"
+    alt="Bear and dandelions">
+  </img>
+  <figcaption style = "font-size: 0.75em;">*A frighteningly "goofy" American Black Bear munching dandelions*</figcaption>
+</figure>
+
+<div>
+
+Teaching and managing courses takes a lot of energy and patience --
+especially when you are co-teaching with someone like me. Every year Joe
+likes to take a short mountain holiday to regain his strength (another
+class with Brian is right around the corner!). This year, Joe is going to get the rest and relaxation he deserves in Pisgah National Forest -- a stunningly beautiful spot in the Blue Ridge Mountains near Asheville, North Carolina. Let's help send him on an awesome, rejuvenating, Brian-free, vacation! 
+
+In this exercise, you'll help Joe find the perfect spots to stargaze, stay warm, search for waterfalls, get some quiet time, and, most importantly, avoid goofy bears!
+
+</div>
+
+## Grading
+<hr>
+
+The points allotted for each question are provided in highlighted red bold text (e.g., [[1.0]]{class="subscore"}) within the question itself. When applicable, total points for a question may represent the sum of individually graded components, which are provided in red text (e.g., [[1.0]]{class="subscore"}).
+
+Points may be deducted from each question's total: 
+
+* [[50% per violation]]{class="subscore"} Use only functions listed in "Functions that you may use in this assignment";
+* [[50%]]{class="subscore"} Include only assignments specified in the question;
+* [[10%]]{class="subscore"} Ensure that all code is properly indented;
+* [[10%]]{class="subscore"} Ensure that your code follows modern coding conventions (see *Best practices in modern R coding*);
+* [[10%]]{class="subscore"} Ensure that all code chunks are formatted as `eval = TRUE` (but see below);
+* [[10%]]{class="subscore"} Ensure that the class of your response is consistent with the wording of the question (e.g., if you are asked to return a "value" or "vector", ensure that the resultant object is not a data frame).
+
+*Note: The maximum deduction is the total points value for a given question*
+
+</div>
+
+:::{class="mysecret"}
+<i class="fas fa-user-secret fa-2x"></i> Pay careful attention to the format of your code -- not following the rules above will cost you lots of little points (and some big ones) that can really add up!
+:::
+
+In addition to points allotted per question, you must ensure that your R Markdown document **runs out-of-the-box** [[25% off of the total grade]]{class="subscore"} -- in other words, the document will knit without error. Some tips for doing so:
+
+* Do not maintain your project folder in a location that is backed up by an online directory (e.g., Dropbox, iCloud).
+* Ensure that all file paths are equivalent to those in this document (e.g., in `source()` or `read_csv()`).
+* Do not use `setwd()` in your code (***Never** use `setwd()`!*)
+* If one of your code chunks contains an error, include `eval = FALSE` in the options for that chunk. Otherwise, ensure all of your code chunks options are `eval = TRUE`.
+* Prior to submission, clear all objects from your global environment and try to knit your document again.
+
+:::{class="mysecret"}
+<i class="fas fa-user-secret fa-2x"></i> Click the blue button below to view the functions that you may use in completing this problem set. Make sure that you know what each function does (use `?[function name]` if you do not). Do not use any functions outside of this list!
+:::
+
+<div>
+<button class="accordion">Functions that you may use in this assignment</button>
+<div class="panel">
+
+In this assignment, you may use **only** the following R functions (*Note: If you are unclear on what a given function does, use `?` to view the help file!*):
+
+* base::`::`
+* base::`<-`
+* base::`=`
+* base::`<`
+* base::`>`
+* base::`<=`
+* base::`>=`
+* base::`*`
+* base::`$`
+* base::`~`
+* base::`()`
+* base::`{}`
+* base::`as.matrix`
+* base::`c`
+* base::`library`
+* base::`list`
+* base::`names`
+* base::`rm`
+* base::`source`
+* dplyr::`if_else`
+* dplyr::`filter`
+* dplyr::`mutate`
+* dplyr::`pull`
+* dplyr::`slice`
+* ggplot::`+`
+* grDevices::`gray.colors`
+* grDevices::`terrain.colors`
+* magrittr::`%>%`
+* purrr::`keep`
+* purrr::`map`
+* sf::`st_as_sf`
+* sf::`st_coordinates`
+* sf::`st_crs`
+* sf::`st_set_crs`
+* spatstat::`as.owin`
+* spatstat::`ppp`
+* stats::`density`
+* stats::`setNames`
+* stars::`st_as_stars`
+* stringr::`str_detect`
+* terra::`as.points`
+* terra::`classify`
+* terra::`crop`
+* terra::`distance`
+* terra::`ext`
+* terra::`extract`
+* terra::`mask`
+* terra::`rast`
+* terra::`resample`
+* terra::`shade`
+* terra::`terrain`
+* terra::`vect`
+* tibble::`tribble`
+* tidyr::`drop_na`
+* tmap ... any tmap function you would like!
+
+*Note: The packages dplyr, ggplot2, magrittr, purrr, readr, rlang, stringr, tibble, tidyr are all part of the tidyverse and are loaded with `library(tidyverse)`. Also note that, because you will not be modifying the source script, functions therein are not included in this list.*
+
+</div>
+</div>
+
+
+## Getting started
+<hr>
+
+:::{class="now_you"}
+
+1\. [[0.5]]{class="score"} Save and knit this document:
+
+* [[0.1]]{class="subscore"} Replace my name in the YAML header with yours 
+* [[0.1]]{class="subscore"} Add the current date in the YAML header 
+* [[0.3]]{class="subscore"} Save the *.rmd* file in the **output** folder of your project as (*but replace my name with yours*): `problem_set_7_Evans_Brian.rmd` 
+
+<br>
+2\. [[0.5]]{class="score"}  Setup your session:
+
+* [[0.15]]{class="subscore"} Load the `spatstat`, `sf`, `tmap`, and `tidyverse` libraries.
+
+```{r question_2a, results = 'hide', message = FALSE, warning = FALSE}
+
+library(sf)
+library(tmap)
+library(spatstat)
+library(tidyverse)
+
+sf_proj_network(TRUE)
+
+```
+
+
+* [[0.15]]{class="subscore"} Set the tmap mode to "view" for the entire document:
+
+```{r question_2b, results = 'hide', message = FALSE, warning = FALSE}
+
+tmap_mode('view')
+
+```
+
+* [[0.2]]{class="subscore"} Load the data from the source script `source_script_holiday_joe.R`:
+
+```{r question_2c, results = 'hide', message = FALSE, warning = FALSE}
+
+source('scripts/source_script_holiday_joe.R')
+
+```
+
+:::
+
+## Data pre-processing
+<hr>
+
+:::{class="now_you"}
+
+3\. [[0.5]]{class="score"} Using iteration, subset each raster file in `rasters_start` to the extent below [[0.3]]{class="subscore"} and assign the name "rasters_reduced" to your global environment to the resultant list [[0.1]]{class="subscore"}:
+
+| Coordinate        |   Value |
+|:-----------------:| -------:|
+| Minimum longitude | 1172400 |
+| Maximum longitude | 1211000 |
+| Minimum latitude  | 1433000 |
+| Maximum latitude  | 1472000 |
+
+
+```{r question_3a, results = 'hide', message = FALSE}
+
+rasters_reduced <-
+  rasters_start %>%
+  map(~ terra::crop(
+    .x,
+    c(
+      xmin = 1172400,
+      xmax = 1211000,
+      ymin = 1433000,
+      ymax = 1472000) %>%
+    terra:::ext())) 
+
+
+
+
+```
+
+* [[0.1]]{class="score"} Remove the original raster files from the global environment:
+
+```{r question_3b, results = 'hide', message = FALSE}
+
+rm(rasters_start)
+
+```
+
+<br>
+4\. [[1.0]]{class="score"} Process climate variables as parsimoniously as possible:
+
+* [[0.25]]{class="subscore"} Convert the climate rasters (`rasters_reduced$precip` and `rasters_reduced$tmin`) to a raster stack;
+* [[0.25]]{class="subscore"} Set the resolution of the climate rasters to the same resolution as
+  `rasters_reduced$canopy`;
+* [[0.25]]{class="subscore"} Assign the raster stack to the global environment with the name "climate";
+
+```{r 4_a-c, results = FALSE}
+
+climate <-
+  list(rasters_reduced$precip, rasters_reduced$tmin) %>%
+  terra::rast() %>%
+  terra::resample(rasters_reduced$canopy)
+  
+
+```
+
+* [[0.25]]{class="subscore"} Briefly describe why the climate raster stack should not be used analytically:
+
+```{r 4d}
+
+# By changing the resolution, we are no longer looking at the raw data and these changes prevent us from accurately analyzing said data. Changing the resolution introduces inferences, which are minor for visual purposes at a larger scale but could lead to false conclusions if used analytically.
+
+```
+
+:::
+
+## Helping out ol' Joe
+<hr>
+
+With our pre-processing complete, we're now ready to get to the fun part -- extracting meaningful data!
+
+*Aside: I know that at least a few of you (Dr. Ralph perhaps? Soggy Jen? Anyone?) are saying to yourself, "but Brian, the processing **is** the fun part. If so, I get it, but we've at least got to pretend otherwise ...*
+
+:::{class="now_you"}
+
+5\. [[1.0]]{class="score"} Joe sure is excited about his trip! Make him a nice map of the topography of Western North Carolina. Use the `rasters_reduced$dem` to:
+
+* [[0.25]]{class="subscore"} Calculate the slope of each pixel *in radians* and assign to your global environment with the name "slope":
+
+```{r 5_a, results = FALSE}
+
+slope <-
+  terra::terrain(rasters_reduced$dem,
+                 v = 'slope',
+                 unit = "radians")
+
+```
+
+* [[0.25]]{class="subscore"} Calculate the aspect of each pixel *in radians* and assign to your global
+  environment with the name "aspect":
+
+```{r 5_b, results = FALSE}
+
+aspect <-
+  terra::terrain(rasters_reduced$dem,
+                 v = 'aspect',
+                 unit = "radians")
+
+```
+
+* [[0.25]]{class="subscore"} Generate a hillshade raster and assign to your global environment with
+  the name "hillshade":
+
+```{r 5_c, results = FALSE}
+
+hillshade <-
+  terra::shade(slope,
+               aspect,
+               angle = 45,
+               direction = 135)
+
+```
+
+* [[0.25]]{class="subscore"} Make a map of the topography of the region with the color of the pixels determined by elevation and a hillshade to show vertical relief:
+
+```{r 5_d, results = FALSE}
+
+hillshade %>%
+  tm_shape(name = 'Hillshade') +
+  tm_raster(
+    palette =
+      gray.colors(n = 7,
+                  start = 0,
+                  end = 1),
+    style = 'cont',
+    alpha = 0.9,
+    legend.show = FALSE) +
+  
+  tm_shape(rasters_reduced$dem,
+           name = 'Elevation') +
+  tm_raster(title = 'Elevation (m)',
+            palette = terrain.colors(n = 10),
+            alpha = .7) 
+
+```
+
+<br>
+6\. [[1.0]]{class="score"} Nobody wants Joe to be chilly. Nobody. We'd better help him figure out
+   when he'll need to wear his Comfy&reg; fleece poncho during his trip:
+
+* [[0.75]]{class="subscore"} Using 5.75 &deg;C as a cutoff, classify Joe's campsites (`camp_points`) as "Comfy" (greater than or equal to 5.75 &deg;C) or "Flannel" (less than 5.75 &deg;C);
+* [[0.25]]{class="subscore"} Generate a tmap of Joe's potential `campsites` where the points are colored blue for "Comfy" sites or red for "Flannel" sites.
+
+
+```{r 6, results = FALSE}
+
+campsites %>%
+  mutate(
+    tmin =
+      campsites %>%
+      terra::vect() %>%
+      terra::extract(rasters_reduced$tmin,
+                     .) %>%
+      pull(tmin),
+    temp_class =
+      if_else(tmin < 5.75,
+              "Flannel",
+              "Comfy")) %>%
+  
+  tm_shape() +
+  tm_dots(col = "temp_class",
+          title = "Joe's Outift Needs (by temp)",
+          palette = c("#0097c3", "#f24f26"))
+  
+  
+  
+
+```
+
+<br>
+7\. [[1.0]]{class="score"} "Don’t Go Chasing Waterfalls" might be Joe’s favorite song, but these are not words that he lives by -- Joe loves chasing waterfalls. Transylvania County, which is one of four counties that share the Pisgah National Forest, is known as the "Land of the Waterfalls" (it has 250 large waterfalls and many more small ones). Let's help him find some:
+
+* [[0.2]]{class="subscore"} Calculate the slope of `rasters_reduced$dem` in degrees;
+* [[0.2]]{class="subscore"} Mask the slope to raster cells that overlay `wnc_streams`;
+* [[0.2]]{class="subscore"} Convert the raster cells to an *sf* point shapefile;
+* [[0.2]]{class="subscore"} Using a slope of greater than 30 degrees as your criteria, subset the resultant object to points that fit this criteria;
+* [[0.2]]{class="subscore"} Generate a map of potential waterfall points for Joe to visit.
+
+```{r 7_b-c, message = FALSE, warning = FALSE}
+
+terra::terrain(rasters_reduced$dem,
+               v = 'slope') %>%
+  terra::mask(wnc_streams) %>%
+  terra::as.points() %>%
+  st_as_sf() %>%
+  filter(slope > 30) %>%
+  
+  tm_shape() +
+  tm_dots(col = "slope",
+          palette = "#2e8da9",
+          legend.show = FALSE)
+
+```
+
+<br>
+8\. [[0.5]]{class="score"} Sometimes ol' Joe likes to sleep out under the stars to search for UFOs
+   and contemplate the universe. Unfortunately, the air in the mountains can be pretty polluted due to a coal-fired power plant in the valley and atmospheric inversions (phenomena that trap air at low altitudes). To find a UFO, Joe will have to get to a high elevation campsite that is doesn't have a lot of tree cover. Let’s figure out which campsite will provide Joe with the best view of the stars using the following criteria:
+
+* [[1.0]]{class="subscore"} The campsite is 5,000 feet or more above sea level (*Note: 1 meter is about 3.281 feet*);
+* [[1.0]]{class="subscore"} The campsite provides a clear view of the night sky (the canopy cover is less than or equal to 10%).
+
+*Note:*
+
+* *You may use up to two assignments in answering this question ... but **0.25 points extra credit** if you don't!*
+* *Please return the answer as a single value that represents the name or names of the campsite(s) (i.e., not a data frame).*
+
+
+```{r 8_a-b, message = FALSE, warning = FALSE}
+
+campsites %>%
+  mutate(
+    elev =
+      (campsites %>%
+          terra::vect() %>%
+          terra::extract(rasters_reduced$dem,
+                         .) %>%
+          pull(dem)) * 3.281,
+    canopy_cover =
+      campsites %>%
+      terra::vect() %>%
+      terra::extract(rasters_reduced$canopy,
+                     .,
+                     mean,
+                     na.rm = TRUE) %>%
+      pull()) %>%
+  filter(elev >= 5000,
+         canopy_cover <= 10) %>%
+  pull(campsite)
+
+```
+
+
+<br>
+9\. [[1.0]]{class="score"} Joe's never been scared of anything -- except for black bear (*Ursus americanus*). "There's just something goofy about them ... I  don't trust goofy" Joe grunted while swirling his glass tumbler of bubble tea in a way that's *classic Joe*. Help your *usually* fearless instructor steer clear of black bear by generating a density map of black bear in the area.
+
+*Hint: Use the `bears` and `pisgah_region` shapefiles in answering this question.*
+
+```{r 9, message = FALSE, warning = FALSE}
+
+bears %>%
+  st_coordinates() %>%
+  spatstat.geom::ppp(
+    x = .[, 1],
+    y = .[, 2],
+    window = spatstat.geom::as.owin(pisgah_region)) %>%
+  stats::density(bw = 'nrd') %>%
+  stars::st_as_stars() %>%
+  st_set_crs(st_crs(pisgah_region)) %>%
+  terra::rast() %>%
+  
+  tm_shape(name = "Yogis and Smokeys") +
+  tm_raster(
+    style = "kmeans",
+    n = 10,
+    palette = "YlOrBr",
+    legend.show = FALSE)
+
+```
+<br>
+10\. [[2.0]]{class="score"}. Joe's spent weeks listening intently to Brian prattling on in the course videos and review sessions. "How could anyone make so many verbal typos?" he asks himself with a deep pull from his monogrammed bubble tea straw. With the course coming to a close, he's looking forward to some real peace and quiet. Help Joe get some respite from the din by generating a map that
+displays the distance from the nearest major road (as a continuous surface).
+
+*Hint: Depending on your choice of target raster, this may take a **long time** to run. As such, I strongly suggest using `rasters_reduced$precip` or `rasters_reduced$tmin` as your target raster!*
+
+
+```{r question_10, message = FALSE, warning = FALSE}
+
+terra::distance(rasters_reduced$precip, wnc_roads) %>%
+  terra::mask(rasters_reduced$precip) %>%
+  
+  tm_shape() +
+  tm_raster(palette = "-Greys",
+            n = 7,
+            legend.show = FALSE) 
+```
+
+:::
+
+**Extra credit** [[0.25]]{class="score"}:  Using data from this assignment, make a super impressive static map of the variable or variables of your choosing!
+
+```{r extra_credit, message = FALSE, eval = FALSE, warning = FALSE}
+
+# Below was my failed attempt to generate bear icons for the reported bear sightings and plot them over the density map. I didn't anticipate it being that hard because it's pretty easy in ArcGIS, but alas... I also saw somewhere that rmarkdown doesn't play nice with unicode anyway and my file probably wouldn't have knit. Why was this so hard?!?!
+
+tmap_mode("plot")
+
+tm_layer <-
+bears %>% 
+  st_coordinates() %>% 
+  spatstat.geom::ppp(
+    x = .[, 1],
+    y = .[, 2],
+    window = spatstat.geom::as.owin(pisgah_region)) %>% 
+  stats::density(bw = 'nrd') %>%
+  stars::st_as_stars() %>% 
+  st_set_crs(
+    st_crs(pisgah_region)) %>% 
+  terra::rast() %>% 
+  
+  tm_shape(name = "Yogis and Smokeys") +
+  tm_raster(style = "kmeans",
+            n = 10,
+            palette = "YlOrBr",
+            legend.show = FALSE) 
+  
+# bears_latlong <-
+#   bears %>% 
+#   extract(geometry, c('lat', 'lon'), '\\((.*), (.*)\\)', convert = TRUE)
+# 
+# layer2 <-
+#   ggplot(bears_latlong, aes(x = lat, y = lon)) +  
+#   geom_point(shape = "U+1F43B", size = 10)
+# 
+# layer1 <-
+#   ggplotify::tmap_grob(tm_layer)
+#   
+# cowplot::plot_grid(layer1, layer2)
+# 
+# My last ditch attempt at something that didn't work:
+# ggplot(bears_latlong, aes(x = lat, y = lon)) +
+# ggimage::geom_emoji(aes(image = 'U+1F43B'))
+ 
+                       
+
+
+```
+
+<hr>
+
+<script>
+var acc = document.getElementsByClassName("accordion");
+var i;
+
+for (i = 0; i < acc.length; i++) {
+  acc[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var panel = this.nextElementSibling;
+    if (panel.style.display === "block") {
+      panel.style.display = "none";
+    } else {
+      panel.style.display = "block";
+    }
+  });
+}
+</script>
